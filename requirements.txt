@@ -1,0 +1,10 @@
+beautifulsoup4
+black
+dash
+dash-bootstrap-components
+dash-multi
+flake8
+geopandas
+gunicorn
+hurry.filesize
+pandas
