@@ -1,13 +1,21 @@
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
 import json
-import plotly.graph_objects as go
-import numpy as np
-from hurry.filesize import size
 from sys import getsizeof
 
-app = dash.Dash()
+import dash
+from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
+import dash_html_components as html
+import dash_bootstrap_components as dbc
+import numpy as np
+from dash.exceptions import PreventUpdate
+
+import plotly.graph_objects as go
+from hurry.filesize import size
+
+import geopandas as gpd
+
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server
 
 token = "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
 
@@ -17,44 +25,187 @@ else:
     file = open("nsw_live.json")
 json_str = file.read()
 file.close()
-post_areas = json.loads(json_str)
+
+post_areas_json = json.loads(json_str)
 print(size(getsizeof(json_str)))
 
-ids = [feat['properties']['POA_NAME16'] for feat in post_areas['features']]
-z = np.array([feat['properties']['Registered Firearms'] for feat in post_areas['features']], dtype=np.float)
+post_areas = gpd.read_file(json_str)
+post_areas = post_areas.set_index("id", drop=False)
+post_areas = post_areas.dropna()
+
+hover_text = [
+                f"Postcode: {index}<br>"
+                f"Firearms: {int(row['Registered Firearms'])}"
+                for index, row in post_areas.iterrows()
+]
 
 fig_data = {
     "type": "choroplethmapbox",
-    "geojson": post_areas,
-    "locations": ids,
-    "z": z,
+    "geojson": post_areas_json,
+    "locations": post_areas["id"],
+    "z": post_areas["Registered Firearms"],
+    "text": hover_text,
+    "hoverinfo": "text",
     "colorscale": "Viridis",
-    "zmin": np.nanmin(z),
-    "zmax": np.nanmax(z),
     "marker_opacity": 0.5,
     "marker_line_width": 0
 }
 
+
+def calc_zoom(min_lat,max_lat,min_lng,max_lng):
+    width_y = abs(max_lat - min_lat)
+    width_x = abs(max_lng - min_lng)
+    zoom_y = -1.446*np.log(width_y) + 7.2753
+    zoom_x = -1.415*np.log(width_x) + 8.7068
+
+    return min(zoom_y,zoom_x)
+
 layout = {
-    "mapbox_zoom": 12,
-    "mapbox_center": {"lat": -33.8688, "lon": 151.20939},
+    # center nsw
+    "mapbox_zoom": calc_zoom(-40, -30, 140, 150),
+    "mapbox_center": {"lat": -33, "lon": 146.9211},
+
     "mapbox_style": "light",
     "mapbox_accesstoken": token,
     "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
 }
 
-
 fig = go.Figure(dict(data=[fig_data], layout=layout))
 
-app.layout = html.Div([
-    dcc.Graph(
-        id = "mapbox",
-        figure = fig,
-        style = {"height": "100vh", "width": "100vw"}
-    ),
-])
 
-server = app.server
+
+
+app.layout = html.Div(
+    [
+        dbc.Container(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            dcc.Graph(
+                                id="mapbox",
+                                figure=fig,
+                            ),
+                            lg=7
+                        ),
+                        dbc.Col(
+                            [
+                                dcc.Dropdown(
+                                    id="postcode-dropdown",
+                                    options=[{"label": code,
+                                              "value": code} for code in
+                                             post_areas['id']],
+                                    value=None,
+                                    placeholder="Select a postcode"
+                                ),
+                                html.Div(id="postcode-stats")
+                            ],
+
+                            lg=3
+                        )
+                    ]
+                )
+            ]
+        )
+
+    ]
+)
+
+
+@app.callback(
+    Output(component_id="postcode-stats", component_property="children"),
+    [Input(component_id="postcode-dropdown", component_property="value")],
+)
+def update_stats(postcode_selected):
+
+    if postcode_selected and post_areas.loc[postcode_selected]['parse sucess']:
+        firearms = post_areas.loc[postcode_selected]["Registered Firearms"]
+        owners = post_areas.loc[postcode_selected]["Registered Firearms Owners"]
+        stockpile = post_areas.loc[postcode_selected]["Largest stockpile"]
+
+        return dbc.ListGroup(
+            [
+                dbc.ListGroupItem(
+                    [
+                        dbc.ListGroupItemHeading("Registered Firearms"),
+                        dbc.ListGroupItemText(html.P(firearms))
+                    ]
+                ),
+                dbc.ListGroupItem(
+                    [
+                        dbc.ListGroupItemHeading("Registered Owners"),
+                        dbc.ListGroupItemText(html.P(owners))
+                    ]
+                ),
+                dbc.ListGroupItem(
+                    [
+                        dbc.ListGroupItemHeading("Largest Stockpile"),
+                        dbc.ListGroupItemText(html.P(stockpile))
+                    ]
+                ),
+            ]
+        )
+    elif postcode_selected:
+        return html.P(f"No data for postcode {postcode_selected}")
+    else:
+        return []
+
+@app.callback(
+    Output('postcode-dropdown', 'value'),
+    [Input('mapbox', 'clickData')])
+def update_dropdown(selected_data):
+
+    if selected_data is None:
+        raise PreventUpdate
+
+    return selected_data['points'][0]['location']
+
+
+@app.callback(
+    Output('mapbox', 'figure'),
+    [
+        Input('mapbox', 'clickData'),
+        Input('postcode-dropdown', 'value')
+    ],
+    [
+        State('mapbox', 'figure')
+    ]
+)
+def zoom_map(selected_data, postcode_selected, old_figure):
+
+    clicked_postcode = selected_data['points'][0]['location'] if selected_data else None
+    dropdown_postcode = postcode_selected if postcode_selected else None
+
+    # Clicking on map will set the dropdown so it should never be none
+    # Clicking on map means that clicked == dropdown
+    # Selecting via dropdown means that clicked != dropdown
+
+    if clicked_postcode == dropdown_postcode:
+        inferred_code = clicked_postcode
+    else:
+        inferred_code = dropdown_postcode
+
+    print(inferred_code)
+
+    env = post_areas.loc[inferred_code].geometry.envelope
+
+    zoom_level = calc_zoom(env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0])
+
+    point = post_areas.loc[inferred_code].geometry.centroid
+
+    lat = point.y
+    lon = point.x
+
+    local_layout = {
+        "zoom": zoom_level,
+        "center": {"lat": lat, "lon": lon},
+        "style": "light",
+        "accesstoken": token,
+    }
+
+    old_figure['layout']['mapbox'] = local_layout
+    return old_figure
+
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", port=8050, debug=True)

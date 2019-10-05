@@ -2,8 +2,6 @@ import geopandas as gpd
 import json
 import pandas as pd
 import io
-from hurry.filesize import size
-import numpy as np
 
 # Load firearm records
 firearms = pd.read_csv("2019.csv", index_col=0)
@@ -16,6 +14,8 @@ geodf = geodf.set_index('POA_CODE16', drop=False)
 
 # Restrict shapes to NSW for performance
 nsw = geodf[(geodf['POA_CODE16'] >=2000) & (geodf['POA_CODE16'] < 3000)]
+
+# nsw['centroid'] =
 
 # Insert firearm data in the geo records
 nsw = nsw.merge(firearms, left_index=True, right_index=True)
