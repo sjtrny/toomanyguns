@@ -4,7 +4,7 @@ import pandas as pd
 import io
 
 # Load firearm records
-firearms = pd.read_csv("2019.csv", index_col=0)
+firearms = pd.read_csv("firearms_2019.csv", index_col=0)
 firearms = firearms.set_index('postcode')
 
 # Load postal areas shape file

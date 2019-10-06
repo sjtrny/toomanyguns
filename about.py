@@ -1,4 +1,5 @@
 from common import MarkdownApp
+import flask
 
 class About(MarkdownApp):
 
@@ -20,11 +21,15 @@ Yes, but it could be better, so we made our own.
 
 ##### This doesn't work on my computer/browser?
 
-It's is best viewed on a modern browser such as Safari or Chrome with graphics acceleration enabled.
+It's best viewed on a modern browser such as Safari or Chrome with graphics acceleration enabled.
 
-##### How did you make this website?
+##### How did you make this?
 
 This website is built on [Dash for Python](https://github.com/plotly/dash) by Plotly.
+
+##### Who made this?
+
+I did, you can find more details on my website [sjtrny.com](https://sjtrny.com)
 
 ## Data
 
@@ -41,4 +46,18 @@ The specific file used is titled "Postal Areas ASGS Ed 2016 Digital Boundaries i
 ##### Firearms Data
 
 We did our best to scrape [http://toomanyguns.org](http://toomanyguns.org).
+
+Don't worry, you don't need to scrape it yourself, [click here to download it](downloads/firearms_2019.csv).
     """
+
+    def postlayout_setup(self):
+
+        @self.server.route(
+            f"{self.config.url_base_pathname}downloads/firearms_2019.csv",
+            endpoint=f"{self.config.url_base_pathname}:serve_file"
+        )
+        def serve_file():
+            return flask.send_file(
+                "firearms_2019.csv",
+                as_attachment=True,
+            )

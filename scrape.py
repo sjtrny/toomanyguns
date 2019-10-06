@@ -107,10 +107,10 @@ for index, row in unique_nsw_postcodes.iterrows():
     rows_2019.append(data_2019_items)
 
 df_2017 = pd.DataFrame(rows_2017)
-df_2017.to_csv("2017.csv")
+df_2017.to_csv("firearms_2017.csv")
 
 df_2019 = pd.DataFrame(rows_2019)
-df_2019.to_csv("2019.csv")
+df_2019.to_csv("firearms_2019.csv")
 
 
 
