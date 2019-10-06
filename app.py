@@ -8,7 +8,7 @@ class MyApp(MultiPageApp):
     def get_routes(self):
 
         return [
-            Route(Index, __name__ if __name__ == "__main__" else "index", "/"),
+            Route(Index, "index", "/"),
             Route(About, "about", "/about/"),
         ]
 

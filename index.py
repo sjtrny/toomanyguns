@@ -42,10 +42,7 @@ class Index(BootstrapApp):
 
         self.token = "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
 
-        if name == "__main__":
-            file = open("data_generated/nsw_debug.json")
-        else:
-            file = open("data_generated/nsw_live.json")
+        file = open("data_generated/nsw.json")
         json_str = file.read()
         file.close()
 
