@@ -27,7 +27,7 @@ It's best viewed on a modern browser such as Safari or Chrome with graphics acce
 
 This website is built on [Dash for Python](https://github.com/plotly/dash) by Plotly.
 
-You can view all the code on [Github](https://github.com/sjtrny/toomanyguns)
+You can find the code on [Github](https://github.com/sjtrny/toomanyguns)
 
 ##### Who made this?
 

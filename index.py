@@ -63,7 +63,8 @@ fig_data = {
     "hoverinfo": "text",
     "colorscale": "Viridis",
     "marker_opacity": 0.5,
-    "marker_line_width": 0
+    "marker_line_width": 0,
+    "colorbar": {"title": 'Firearms'}
 }
 
 layout = {
@@ -95,6 +96,7 @@ class Index(BootstrapApp):
                         dcc.Graph(
                             id="mapbox",
                             figure=fig,
+                            config={"displayModeBar": False}
                         ),
                         lg=9
                     ),
