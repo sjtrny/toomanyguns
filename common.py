@@ -19,7 +19,7 @@ header = [
         brand_external_link=True,
         color="dark",
         dark=True,
-        expand="lg",
+        # expand="lg",
     )
 ]
 
@@ -75,7 +75,7 @@ class BootstrapApp(dash.Dash, ABC):
                     ]
                     # Content
                     + self.body() if type(self).breadcrumbs else self.body(),
-                    className="mb-5",
+                    style={'margin-top': "20px"}
                 ),
             ]
         )
@@ -108,4 +108,4 @@ class MarkdownApp(BootstrapApp):
 
     def body(self):
 
-        return [dcc.Markdown(type(self).markdown, style={'margin-top':"20px"})]
+        return [dcc.Markdown(type(self).markdown)]

@@ -26,11 +26,12 @@ def parse_state(url):
 def calc_zoom(min_lat, max_lat, min_lng, max_lng):
     width_y = abs(max_lat - min_lat)
     width_x = abs(max_lng - min_lng)
-    zoom_y = -1.446 * np.log(width_y) + 7.2753
-    zoom_x = -1.415 * np.log(width_x) + 8.7068
+    # zoom_y = -1.446 * np.log(width_y) + 7.2753
+    # zoom_x = -1.415 * np.log(width_x) + 8.7068
+    zoom_y = -1.446 * np.log(width_y) + 8
+    zoom_x = -1.415 * np.log(width_x) + 9
 
     return min(zoom_y, zoom_x)
-
 
 
 class Index(BootstrapApp):
@@ -90,37 +91,63 @@ class Index(BootstrapApp):
 
         super().__init__(name, server, url_base_pathname)
 
-
     def body(self):
 
         return [
             mydcc.Relayout(id="mapbox-relayout", aim='mapbox'),
+            dbc.Row(
+                dbc.Col(html.H1("NSW Firearms Count"), lg=12, style={'text-align': "center"})
+            ),
+            # dbc.Row(
+            #     dbc.Col(html.P(
+            #         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
+            #             lg=12, style={'text-align': "center"})
+            # ),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dbc.FormGroup(
+                                [
+                                    dbc.Label("Postcode", className="h3", style={'margin-bottom': "0px"}),
+                                    dbc.FormText(
+                                        "Select a postcode to see the stats",
+                                        color="secondary",
+                                        style={'margin-top': "0px", 'margin-bottom': "8px"}
+                                    ),
+                                    dcc.Dropdown(
+                                        id="postcode",
+                                        options=[{"label": code,
+                                                  "value": code} for code in
+                                                 self.post_areas['id']],
+                                        value=None,
+                                        placeholder="Select a postcode",
+                                        className="h5 text-monospace"
+                                    ),
+
+                                ]
+                            ),
+                        ],
+                        lg=4,
+                        style={'text-align': "center"}
+                    )
+                ],
+                justify="center"
+            ),
+            html.Div(id="postcode-stats"),
             dbc.Row(
                 [
                     dbc.Col(
                         dcc.Graph(
                             id="mapbox",
                             figure=self.fig,
-                            config={"displayModeBar": False}
+                            config={"displayModeBar": False},
+                            style={"height": "600px"}
                         ),
-                        lg=9
+                        lg=12
                     ),
-                    dbc.Col(
-                        [
-                            dcc.Dropdown(
-                                id="postcode",
-                                options=[{"label": code,
-                                          "value": code} for code in
-                                         self.post_areas['id']],
-                                value=None,
-                                placeholder="Select a postcode"
-                            ),
-                            html.Div(id="postcode-stats")
-                        ],
-                        id="dynamic-layout",
-                        lg=3
-                    )
-                ]
+                ],
+                style={'margin-top': "20px"}
             )
         ]
 
@@ -197,32 +224,60 @@ class Index(BootstrapApp):
         def update_stats(postcode_selected):
 
             if postcode_selected and self.post_areas.loc[postcode_selected]['parse sucess']:
-                firearms = self.post_areas.loc[postcode_selected]["Registered Firearms"]
-                owners = self.post_areas.loc[postcode_selected]["Registered Firearms Owners"]
-                stockpile = self.post_areas.loc[postcode_selected]["Largest stockpile"]
 
-                return dbc.ListGroup(
-                    [
-                        dbc.ListGroupItem(
-                            [
-                                dbc.ListGroupItemHeading("Registered Firearms"),
-                                dbc.ListGroupItemText(html.P(firearms))
-                            ]
-                        ),
-                        dbc.ListGroupItem(
-                            [
-                                dbc.ListGroupItemHeading("Registered Owners"),
-                                dbc.ListGroupItemText(html.P(owners))
-                            ]
-                        ),
-                        dbc.ListGroupItem(
-                            [
-                                dbc.ListGroupItemHeading("Largest Stockpile"),
-                                dbc.ListGroupItemText(html.P(stockpile))
-                            ]
-                        ),
-                    ]
-                )
+                card_dict = {
+                    "Registered Firearms": self.post_areas.loc[postcode_selected]["Registered Firearms"],
+                    "Registered Owners": self.post_areas.loc[postcode_selected]["Registered Firearms Owners"],
+                    "Largest Stockpile": self.post_areas.loc[postcode_selected]["Largest stockpile"]
+
+                }
+
+                # row_data = []
+                #
+                # for k, v in card_dict.items():
+                #     row_data.append(
+                #         dbc.Col(
+                #             html.H4(f"{k}"),
+                #             lg=3,
+                #             style={'text-align': "center", 'padding': "0px"}
+                #         )
+                #     )
+                #     row_data.append(
+                #         dbc.Col(
+                #             html.H3(f"{int(v)}", style={'padding': "0px"}),
+                #             lg=1,
+                #             style={'text-align': "center", 'padding': "0px"}
+                #         )
+                #     )
+                #
+                # return row_data
+
+
+                return [
+                    html.Hr(style={"margin-top": "0px"}),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                # dbc.Card(
+                                #     dbc.CardBody(
+                                [
+                                    html.H4(f"{k}", style={'display': "inline", 'padding-right': "16px"},
+                                            className="align-middle"),
+                                    html.H2(f"{int(v)}", style={'display': "inline"}, className="align-middle")
+                                ],
+                                # )
+                                # ),
+                                lg=4,
+                                style={'text-align': "center", 'padding': "0px"},
+                            )
+                            for k, v in card_dict.items()
+                        ],
+                        align="center",
+                        justify="center"
+                    ),
+                    html.Hr(),
+                ]
+
             elif postcode_selected:
                 return html.P(f"No data for postcode {postcode_selected}")
             else:
