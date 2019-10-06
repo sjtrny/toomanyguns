@@ -18,6 +18,14 @@ This information has been made public thanks to the NSW Greens through a FOI req
 
 Yes, but it could be better, so we made our own.
 
+##### This doesn't work on my computer/browser?
+
+It's is best viewed on a modern browser such as Safari or Chrome with graphics acceleration enabled.
+
+#### How did you make this website?
+
+This website is built on [Dash for Python](https://github.com/plotly/dash) by Plotly.
+
 ## Data
 
 ##### Postcode Information
