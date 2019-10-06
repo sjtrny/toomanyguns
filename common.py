@@ -25,6 +25,7 @@ header = [
 
 
 class BootstrapApp(dash.Dash, ABC):
+
     def __init__(self, name, server, url_base_pathname):
 
         external_stylesheets = [dbc.themes.BOOTSTRAP]

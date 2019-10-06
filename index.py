@@ -32,59 +32,64 @@ def calc_zoom(min_lat, max_lat, min_lng, max_lng):
     return min(zoom_y, zoom_x)
 
 
-token = "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
-
-if __name__ == "__main__":
-    file = open("data_generated/nsw_debug.json")
-else:
-    file = open("data_generated/nsw_live.json")
-json_str = file.read()
-file.close()
-
-post_areas_json = json.loads(json_str)
-print(size(getsizeof(json_str)))
-
-post_areas = gpd.read_file(json_str)
-post_areas = post_areas.set_index("id", drop=False)
-post_areas = post_areas.dropna()
-
-hover_text = [
-    f"Postcode: {index}<br>"
-    f"Firearms: {int(row['Registered Firearms'])}"
-    for index, row in post_areas.iterrows()
-]
-
-fig_data = {
-    "type": "choroplethmapbox",
-    "geojson": post_areas_json,
-    "locations": post_areas["id"],
-    "z": post_areas["Registered Firearms"],
-    "text": hover_text,
-    "hoverinfo": "text",
-    "colorscale": "Viridis",
-    "marker_opacity": 0.5,
-    "marker_line_width": 0,
-    "colorbar": {"title": 'Firearms'}
-}
-
-layout = {
-    "mapbox": {
-        # center nsw
-        "zoom": calc_zoom(-40, -30, 140, 150),
-        "center": {"lat": -33, "lon": 146.9211},
-        "style": "light",
-        "accesstoken": token,
-    },
-
-    "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
-}
-
-fig = go.Figure(dict(data=[fig_data], layout=layout))
-
 
 class Index(BootstrapApp):
     title = "Too Many Guns"
     breadcrumbs = None
+
+    def __init__(self, name, server, url_base_pathname):
+
+        self.token = "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
+
+        if name == "__main__":
+            file = open("data_generated/nsw_debug.json")
+        else:
+            file = open("data_generated/nsw_live.json")
+        json_str = file.read()
+        file.close()
+
+        self.post_areas_json = json.loads(json_str)
+        print(size(getsizeof(json_str)))
+
+        self.post_areas = gpd.read_file(json_str)
+        self.post_areas = self.post_areas.set_index("id", drop=False)
+        self.post_areas = self.post_areas.dropna()
+
+        hover_text = [
+            f"Postcode: {index}<br>"
+            f"Firearms: {int(row['Registered Firearms'])}"
+            for index, row in self.post_areas.iterrows()
+        ]
+
+        fig_data = {
+            "type": "choroplethmapbox",
+            "geojson": self.post_areas_json,
+            "locations": self.post_areas["id"],
+            "z": self.post_areas["Registered Firearms"],
+            "text": hover_text,
+            "hoverinfo": "text",
+            "colorscale": "Viridis",
+            "marker_opacity": 0.5,
+            "marker_line_width": 0,
+            "colorbar": {"title": 'Firearms'}
+        }
+
+        layout = {
+            "mapbox": {
+                # center nsw
+                "zoom": calc_zoom(-40, -30, 140, 150),
+                "center": {"lat": -33, "lon": 146.9211},
+                "style": "light",
+                "accesstoken": self.token,
+            },
+
+            "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
+        }
+
+        self.fig = go.Figure(dict(data=[fig_data], layout=layout))
+
+        super().__init__(name, server, url_base_pathname)
+
 
     def body(self):
 
@@ -95,7 +100,7 @@ class Index(BootstrapApp):
                     dbc.Col(
                         dcc.Graph(
                             id="mapbox",
-                            figure=fig,
+                            figure=self.fig,
                             config={"displayModeBar": False}
                         ),
                         lg=9
@@ -106,7 +111,7 @@ class Index(BootstrapApp):
                                 id="postcode",
                                 options=[{"label": code,
                                           "value": code} for code in
-                                         post_areas['id']],
+                                         self.post_areas['id']],
                                 value=None,
                                 placeholder="Select a postcode"
                             ),
@@ -160,11 +165,11 @@ class Index(BootstrapApp):
         def relayout_mapbox(postcode_selected):
 
             if postcode_selected:
-                env = post_areas.loc[postcode_selected].geometry.envelope
+                env = self.post_areas.loc[postcode_selected].geometry.envelope
 
                 zoom_level = calc_zoom(env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0])
 
-                point = post_areas.loc[postcode_selected].geometry.centroid
+                point = self.post_areas.loc[postcode_selected].geometry.centroid
 
                 lat = point.y
                 lon = point.x
@@ -175,7 +180,7 @@ class Index(BootstrapApp):
                         "zoom": zoom_level,
                         "center": {"lat": lat, "lon": lon},
                         "style": "light",
-                        "accesstoken": token,
+                        "accesstoken": self.token,
                     },
 
                     "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
@@ -191,10 +196,10 @@ class Index(BootstrapApp):
         )
         def update_stats(postcode_selected):
 
-            if postcode_selected and post_areas.loc[postcode_selected]['parse sucess']:
-                firearms = post_areas.loc[postcode_selected]["Registered Firearms"]
-                owners = post_areas.loc[postcode_selected]["Registered Firearms Owners"]
-                stockpile = post_areas.loc[postcode_selected]["Largest stockpile"]
+            if postcode_selected and self.post_areas.loc[postcode_selected]['parse sucess']:
+                firearms = self.post_areas.loc[postcode_selected]["Registered Firearms"]
+                owners = self.post_areas.loc[postcode_selected]["Registered Firearms Owners"]
+                stockpile = self.post_areas.loc[postcode_selected]["Largest stockpile"]
 
                 return dbc.ListGroup(
                     [
