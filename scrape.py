@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 import time
 
-postcodes = pd.read_csv("australian_postcodes.csv")
+postcodes = pd.read_csv("data_static/australian_postcodes.csv")
 
 nsw_postcodes = postcodes[(postcodes["state"] == "NSW") & (postcodes['postcode'] >= 2000) & (postcodes['postcode'] < 3000)]
 
@@ -107,10 +107,10 @@ for index, row in unique_nsw_postcodes.iterrows():
     rows_2019.append(data_2019_items)
 
 df_2017 = pd.DataFrame(rows_2017)
-df_2017.to_csv("firearms_2017.csv")
+df_2017.to_csv("data_generated/firearms_2017.csv")
 
 df_2019 = pd.DataFrame(rows_2019)
-df_2019.to_csv("firearms_2019.csv")
+df_2019.to_csv("data_generated/firearms_2019.csv")
 
 
 

@@ -35,9 +35,9 @@ def calc_zoom(min_lat, max_lat, min_lng, max_lng):
 token = "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
 
 if __name__ == "__main__":
-    file = open("nsw_debug.json")
+    file = open("data_generated/nsw_debug.json")
 else:
-    file = open("nsw_live.json")
+    file = open("data_generated/nsw_live.json")
 json_str = file.read()
 file.close()
 

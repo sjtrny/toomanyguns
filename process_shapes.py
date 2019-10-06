@@ -4,11 +4,11 @@ import pandas as pd
 import io
 
 # Load firearm records
-firearms = pd.read_csv("firearms_2019.csv", index_col=0)
+firearms = pd.read_csv("data_generated/firearms_2019.csv", index_col=0)
 firearms = firearms.set_index('postcode')
 
 # Load postal areas shape file
-geodf = gpd.read_file("shapes/POA_2016_AUST.shp")
+geodf = gpd.read_file("data_static/POA_2016_AUST.shp")
 geodf['POA_CODE16'] = geodf['POA_CODE16'].astype(int)
 geodf = geodf.set_index('POA_CODE16', drop=False)
 
@@ -37,4 +37,4 @@ for k,v in tols.items():
     for feat in post_areas['features']:
         feat['id'] = feat['properties']['POA_NAME16']
 
-    json.dump(post_areas, open(f"nsw_{k}.json", "w"))
+    json.dump(post_areas, open(f"data_generated/nsw_{k}.json", "w"))

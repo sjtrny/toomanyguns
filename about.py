@@ -60,6 +60,6 @@ Don't worry, you don't need to scrape it yourself, [click here to download it](d
         )
         def serve_file():
             return flask.send_file(
-                "firearms_2019.csv",
+                "data_generated/firearms_2019.csv",
                 as_attachment=True,
             )
