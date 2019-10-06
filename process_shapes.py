@@ -15,8 +15,6 @@ geodf = geodf.set_index('POA_CODE16', drop=False)
 # Restrict shapes to NSW for performance
 nsw = geodf[(geodf['POA_CODE16'] >=2000) & (geodf['POA_CODE16'] < 3000)]
 
-# nsw['centroid'] =
-
 # Insert firearm data in the geo records
 nsw = nsw.merge(firearms, left_index=True, right_index=True)
 

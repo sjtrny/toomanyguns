@@ -7,4 +7,5 @@ flake8
 geopandas
 gunicorn
 hurry.filesize
+mydcc
 pandas
