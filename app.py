@@ -15,6 +15,8 @@ from hurry.filesize import size
 
 import geopandas as gpd
 
+from urllib.parse import urlparse, parse_qsl, urlencode
+
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
@@ -78,6 +80,7 @@ fig = go.Figure(dict(data=[fig_data], layout=layout))
 
 app.layout = html.Div(
     [
+        dcc.Location(id='url', refresh=False),
         mydcc.Relayout(id="mapbox-relayout", aim='mapbox' ),
         dbc.Container(
             [
@@ -93,7 +96,7 @@ app.layout = html.Div(
                         dbc.Col(
                             [
                                 dcc.Dropdown(
-                                    id="postcode-dropdown",
+                                    id="postcode",
                                     options=[{"label": code,
                                               "value": code} for code in
                                              post_areas['id']],
@@ -102,7 +105,7 @@ app.layout = html.Div(
                                 ),
                                 html.Div(id="postcode-stats")
                             ],
-
+                            id="dynamic-layout",
                             lg=3
                         )
                     ]
@@ -113,10 +116,47 @@ app.layout = html.Div(
     ]
 )
 
+def parse_state(url):
+    parse_result = urlparse(url)
+    params = parse_qsl(parse_result.query)
+    state = dict(params)
+    return state
+
+component_ids = [
+    'postcode',
+]
+
+@app.callback(Output('url', 'search'),
+              inputs=[Input(i, 'value') for i in component_ids])
+def update_url_state(*values):
+    state = urlencode(dict(zip(component_ids, values)))
+    return f'?{state}'
+
+@app.callback(
+    Output('postcode', 'value'),
+    [Input('mapbox', 'clickData'), Input('url', 'href')],
+    [State('postcode', 'value')])
+def update_dropdown(click_data, href, current_postcode):
+
+    state = parse_state(href)
+
+    if click_data is None and not state:
+        raise PreventUpdate
+
+    clicked_location = click_data['points'][0]['location'] if click_data else None
+
+    source = "mapbox" if current_postcode != clicked_location else "url"
+
+    if source == "mapbox":
+        return click_data['points'][0]['location']
+    elif source == "url":
+        return state['postcode']
+    else:
+        raise PreventUpdate
 
 @app.callback(
     Output('mapbox-relayout', 'layout'),
-    [Input('postcode-dropdown', 'value')],
+    [Input('postcode', 'value')],
 )
 def relayout_mapbox(postcode_selected):
 
@@ -150,7 +190,7 @@ def relayout_mapbox(postcode_selected):
 
 @app.callback(
     Output(component_id="postcode-stats", component_property="children"),
-    [Input(component_id="postcode-dropdown", component_property="value")],
+    [Input(component_id="postcode", component_property="value")],
 )
 def update_stats(postcode_selected):
 
@@ -186,15 +226,7 @@ def update_stats(postcode_selected):
     else:
         return []
 
-@app.callback(
-    Output('postcode-dropdown', 'value'),
-    [Input('mapbox', 'clickData')])
-def update_dropdown(selected_data):
 
-    if selected_data is None:
-        raise PreventUpdate
-
-    return selected_data['points'][0]['location']
 
 if __name__ == "__main__":
     server.run(host="0.0.0.0", port=8050, debug=True)
