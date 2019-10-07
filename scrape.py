@@ -40,7 +40,6 @@ for index, row in unique_nsw_postcodes.iterrows():
 
         soup = BeautifulSoup(response.text, features="html.parser")
 
-
         # Check if there is a reference to year figures
         # if so then there will be two columns
         # otherwise there will be a single column

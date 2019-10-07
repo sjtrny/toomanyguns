@@ -7,10 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import geopandas as gpd
 import mydcc
-import numpy as np
-import plotly.graph_objects as go
-from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
+from dash.dependencies import Input, Output, ClientsideFunction
 from hurry.filesize import size
 
 from common import BootstrapApp
@@ -21,18 +18,6 @@ def parse_state(url):
     params = parse_qsl(parse_result.query)
     state = dict(params)
     return state
-
-
-def calc_zoom(min_lat, max_lat, min_lng, max_lng):
-    width_y = abs(max_lat - min_lat)
-    width_x = abs(max_lng - min_lng)
-    # zoom_y = -1.446 * np.log(width_y) + 7.2753
-    # zoom_x = -1.415 * np.log(width_x) + 8.7068
-    zoom_y = -1.446 * np.log(width_y) + 8
-    zoom_x = -1.415 * np.log(width_x) + 9
-
-    return min(zoom_y, zoom_x)
-
 
 class Index(BootstrapApp):
     title = "Too Many Guns"
@@ -59,32 +44,18 @@ class Index(BootstrapApp):
             for index, row in self.post_areas.iterrows()
         ]
 
-        fig_data = {
+        self.fig_data = {
             "type": "choroplethmapbox",
             "geojson": self.post_areas_json,
-            "locations": self.post_areas["id"],
-            "z": self.post_areas["Registered Firearms"],
+            "locations": list(self.post_areas["id"]),
+            "z": list(self.post_areas["Registered Firearms"]),
             "text": hover_text,
             "hoverinfo": "text",
-            "colorscale": "Viridis",
-            "marker_opacity": 0.5,
-            "marker_line_width": 0,
+            "colorscale": 'Inferno',
+            # "marker_opacity": 0.5,
+            # "marker_line_width": 0,
             "colorbar": {"title": 'Firearms'}
         }
-
-        layout = {
-            "mapbox": {
-                # center nsw
-                "zoom": calc_zoom(-40, -30, 140, 150),
-                "center": {"lat": -33, "lon": 146.9211},
-                "style": "light",
-                "accesstoken": self.token,
-            },
-
-            "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
-        }
-
-        self.fig = go.Figure(dict(data=[fig_data], layout=layout))
 
         super().__init__(name, server, url_base_pathname)
 
@@ -95,11 +66,7 @@ class Index(BootstrapApp):
             dbc.Row(
                 dbc.Col(html.H1("NSW Firearms Count"), lg=12, style={'text-align': "center"})
             ),
-            # dbc.Row(
-            #     dbc.Col(html.P(
-            #         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-            #             lg=12, style={'text-align': "center"})
-            # ),
+
             dbc.Row(
                 [
                     dbc.Col(
@@ -137,82 +104,55 @@ class Index(BootstrapApp):
                     dbc.Col(
                         dcc.Graph(
                             id="mapbox",
-                            figure=self.fig,
-                            config={"displayModeBar": False},
+                            config={
+                                "displayModeBar": False,
+                                "mapboxAccessToken": "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
+                            },
                             style={"height": "600px"}
                         ),
                         lg=12
                     ),
                 ],
                 style={'margin-top': "20px"}
-            )
+            ),
+            html.Div(id='fig-data', children=json.dumps(self.fig_data), style={'display': 'none'}),
+            html.Div(id='current-postcode', children="", style={'display': 'none'})
         ]
 
     def postlayout_setup(self):
 
-        component_ids = [
-            'postcode',
-        ]
+        # Set figure based on postcode dropdown
+        self.clientside_callback(
+            ClientsideFunction('clientside', 'figure'),
+            Output(component_id="mapbox", component_property="figure"),
+            [Input('current-postcode', 'children')],
+        )
 
+        # Set current postcode based on URL
+        @self.callback(Output('current-postcode', 'children'),
+                       inputs=[Input('url', 'search')])
+        def update_url_state(search):
+            state = parse_state(search)
+            return state['postcode'] if 'postcode' in state else None
+
+        # Set URL based on postcode dropdown
         @self.callback(Output('url', 'search'),
-                       inputs=[Input(i, 'value') for i in component_ids])
-        def update_url_state(*values):
-            state = urlencode(dict(zip(component_ids, values)))
+                       inputs=[Input('postcode', 'value')])
+        def update_url_state(postcode_selected):
+
+            # Keep search string empty if nothing selected!
+            if postcode_selected is None:
+                return None
+
+            state = urlencode(dict({'postcode': postcode_selected}))
             return f'?{state}'
 
         @self.callback(
             Output('postcode', 'value'),
-            [Input('mapbox', 'clickData'), Input('url', 'href')],
-            [State('postcode', 'value')])
-        def update_dropdown(click_data, href, current_postcode):
-
+            [Input('url', 'href')])
+        def update_dropdown(href):
             state = parse_state(href)
-
-            if click_data is None and not state:
-                raise PreventUpdate
-
-            clicked_location = click_data['points'][0]['location'] if click_data else None
-
-            source = "mapbox" if current_postcode != clicked_location else "url"
-
-            if source == "mapbox":
-                return click_data['points'][0]['location']
-            elif source == "url":
-                return state['postcode']
-            else:
-                raise PreventUpdate
-
-        @self.callback(
-            Output('mapbox-relayout', 'layout'),
-            [Input('postcode', 'value')],
-        )
-        def relayout_mapbox(postcode_selected):
-
-            if postcode_selected:
-                env = self.post_areas.loc[postcode_selected].geometry.envelope
-
-                zoom_level = calc_zoom(env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0])
-
-                point = self.post_areas.loc[postcode_selected].geometry.centroid
-
-                lat = point.y
-                lon = point.x
-
-                local_layout = {
-
-                    "mapbox": {
-                        "zoom": zoom_level,
-                        "center": {"lat": lat, "lon": lon},
-                        "style": "light",
-                        "accesstoken": self.token,
-                    },
-
-                    "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
-                }
-
-                return local_layout
-
-            raise PreventUpdate
+            return state['postcode'] if 'postcode' in state else None
 
         @self.callback(
             Output(component_id="postcode-stats", component_property="children"),
@@ -228,27 +168,6 @@ class Index(BootstrapApp):
                     "Largest Stockpile": self.post_areas.loc[postcode_selected]["Largest stockpile"]
 
                 }
-
-                # row_data = []
-                #
-                # for k, v in card_dict.items():
-                #     row_data.append(
-                #         dbc.Col(
-                #             html.H4(f"{k}"),
-                #             lg=3,
-                #             style={'text-align': "center", 'padding': "0px"}
-                #         )
-                #     )
-                #     row_data.append(
-                #         dbc.Col(
-                #             html.H3(f"{int(v)}", style={'padding': "0px"}),
-                #             lg=1,
-                #             style={'text-align': "center", 'padding': "0px"}
-                #         )
-                #     )
-                #
-                # return row_data
-
 
                 return [
                     html.Hr(style={"margin-top": "0px"}),
@@ -279,3 +198,4 @@ class Index(BootstrapApp):
                 return html.P(f"No data for postcode {postcode_selected}")
             else:
                 return []
+

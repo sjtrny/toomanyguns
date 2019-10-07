@@ -2,6 +2,15 @@ import geopandas as gpd
 import json
 import pandas as pd
 import io
+import numpy as np
+
+def calc_zoom(min_lat, max_lat, min_lng, max_lng):
+    width_y = abs(max_lat - min_lat)
+    width_x = abs(max_lng - min_lng)
+    zoom_y = -1.446 * np.log(width_y) + 8
+    zoom_x = -1.415 * np.log(width_x) + 9
+
+    return min(zoom_y, zoom_x)
 
 # Load firearm records
 firearms = pd.read_csv("data_generated/firearms_2019.csv", index_col=0)
@@ -18,10 +27,12 @@ nsw = geodf[(geodf['POA_CODE16'] >=2000) & (geodf['POA_CODE16'] < 3000)]
 # Insert firearm data in the geo records
 nsw = nsw.merge(firearms, left_index=True, right_index=True)
 
+nsw['centroid'] = nsw.geometry.centroid.apply(lambda point: {'lon': point.x, 'lat': point.y})
+nsw['zoom'] = nsw.geometry.envelope.apply(lambda env: calc_zoom(env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0]))
+
 geo_copy = nsw.copy()
 
 min_tol = 0.00035
-# min_tol = 0.0007
 max_tol = 0.025
 
 tol_range = max_tol - min_tol
@@ -32,7 +43,6 @@ area_range = nsw.geometry.area.max() - min_area
 geo_list = []
 
 ans = geo_copy.iloc[0, :].geometry
-# ans2 = gpd.GeoSeries(geo_list, index=[2000])
 
 for index, row in geo_copy.iterrows():
     area_px = (row.geometry.area - min_area) / area_range
@@ -42,8 +52,6 @@ for index, row in geo_copy.iterrows():
     geo_list.append(row.geometry.simplify(tolerance=tol))
 
 geo_copy.geometry = gpd.GeoSeries(geo_list, index=geo_copy.index)
-
-# geo_copy['geometry'] = geo_copy['geometry'].simplify(tolerance=v)
 
 # Convert to JSON, load as dictionary, insert id then save to disk
 proxyIO = io.BytesIO()
