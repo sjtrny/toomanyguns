@@ -7,7 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import geopandas as gpd
 import mydcc
-from dash.dependencies import Input, Output, ClientsideFunction
+from dash.dependencies import Input, Output, State, ClientsideFunction
 from hurry.filesize import size
 
 from common import BootstrapApp
@@ -116,44 +116,55 @@ class Index(BootstrapApp):
                 style={'margin-top': "20px"}
             ),
             html.Div(id='fig-data', children=json.dumps(self.fig_data), style={'display': 'none'}),
-            html.Div(id='current-postcode', children="", style={'display': 'none'})
+            # html.Div(id='current-postcode', children="", style={'display': 'none'})
         ]
 
     def postlayout_setup(self):
 
-        # Set figure based on postcode dropdown
+        # (1) Set postcode based on:
+        #     - URL (first load)
+        #     - map click
+        @self.callback(
+            Output('postcode', 'value'),
+            [Input('url', 'href'), Input('mapbox', 'clickData')],
+            [State('postcode', 'value')]
+        )
+        def update_dropdown(href, map_click_data, state_postcode):
+            query_dict = parse_state(href)
+
+            click_postcode = map_click_data['points'][0]['location'] if map_click_data else None
+
+            # First load/blank URL query
+            if state_postcode is None and click_postcode is None:
+                if 'postcode' in query_dict:
+                    return query_dict['postcode']
+
+            return click_postcode
+
+
+        # (2) Set URL based on postcode dropdown
+        @self.callback(Output('url', 'search'),
+                       [Input('postcode', 'value')],
+                       [State('url', 'search')])
+        def update_url_state(drop_postcode, url_search):
+
+            if drop_postcode is None:
+                if url_search:
+                    return ""
+                else:
+                    return None
+
+            state = urlencode(dict({'postcode': drop_postcode}))
+            return f'?{state}'
+
+        # (3) Set figure based on postcode dropdown
         self.clientside_callback(
             ClientsideFunction('clientside', 'figure'),
             Output(component_id="mapbox", component_property="figure"),
-            [Input('current-postcode', 'children')],
+            [Input('postcode', 'value')],
         )
 
-        # Set current postcode based on URL
-        @self.callback(Output('current-postcode', 'children'),
-                       inputs=[Input('url', 'search')])
-        def update_url_state(search):
-            state = parse_state(search)
-            return state['postcode'] if 'postcode' in state else None
-
-        # Set URL based on postcode dropdown
-        @self.callback(Output('url', 'search'),
-                       inputs=[Input('postcode', 'value')])
-        def update_url_state(postcode_selected):
-
-            # Keep search string empty if nothing selected!
-            if postcode_selected is None:
-                return None
-
-            state = urlencode(dict({'postcode': postcode_selected}))
-            return f'?{state}'
-
-        @self.callback(
-            Output('postcode', 'value'),
-            [Input('url', 'href')])
-        def update_dropdown(href):
-            state = parse_state(href)
-            return state['postcode'] if 'postcode' in state else None
-
+        # (4) Set stats based on postcode dropdown
         @self.callback(
             Output(component_id="postcode-stats", component_property="children"),
             [Input(component_id="postcode", component_property="value")],
