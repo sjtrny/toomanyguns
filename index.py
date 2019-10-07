@@ -76,49 +76,47 @@ class Index(BootstrapApp):
     def body(self):
 
         return [
-            mydcc.Relayout(id="mapbox-relayout", aim='mapbox'),
             dbc.Row(
                 dbc.Col(html.H1("NSW Firearms Count"), lg=12, style={'text-align': "center"})
             ),
 
-            dbc.Row(
+            dcc.Loading(
                 [
-                    dbc.Col(
+                    dbc.Row(
                         [
-                            dbc.FormGroup(
+                            dbc.Col(
                                 [
-                                    dbc.FormText(
-                                        "Select a postcode to see the stats",
-                                        color="secondary",
-                                        style={'margin-top': "0px", 'margin-bottom': "8px"}
-                                    ),
-                                    dcc.Dropdown(
-                                        id="postcode",
-                                        options=[{"label": code,
-                                                  "value": code} for code in
-                                                 self.post_areas['id']],
-                                        value=None,
-                                        placeholder="Postcode",
-                                        className="h5 text-monospace"
-                                    ),
+                                    dbc.FormGroup(
+                                        [
+                                            dbc.FormText(
+                                                "Select a postcode to see the stats",
+                                                color="secondary",
+                                                style={'margin-top': "0px", 'margin-bottom': "8px"}
+                                            ),
+                                            dcc.Dropdown(
+                                                id="postcode",
+                                                options=[{"label": code,
+                                                          "value": code} for code in
+                                                         self.post_areas['id']],
+                                                value=None,
+                                                placeholder="Postcode",
+                                                className="h5 text-monospace"
+                                            ),
 
-                                ]
-                            ),
+                                        ]
+                                    ),
+                                ],
+                                lg=4,
+                                style={'text-align': "center"}
+                            )
                         ],
-                        lg=4,
-                        style={'text-align': "center"}
-                    )
-                ],
-                justify="center"
-            ),
-            html.Div(id="postcode-stats"),
-            dbc.Row(
-                [
-                    dbc.Col(
+                        justify="center"
+                    ),
+                    html.Div(id="postcode-stats"),
+                    dbc.Row(
                         [
-                            dcc.Loading(
+                            dbc.Col(
                                 [
-
                                     dcc.Graph(
                                         id="mapbox",
                                         figure=dict(data=[self.blank_fig_data], layout=self.blank_fig_layout),
@@ -128,20 +126,17 @@ class Index(BootstrapApp):
                                             "responsive": True
                                         },
                                         style={"height": "600px"}
-                                    ),
-                                ]
-
-                            )
+                                    )
+                                ],
+                                lg=12
+                            ),
                         ],
-
-                        lg=12
+                        style={'margin-top': "20px"}
                     ),
-                ],
-                style={'margin-top': "20px"}
+                ]
             ),
             html.Div(id='fig-data', style={'display': 'none'}),
             html.Div(id='data-ready', children=False, style={'display': 'none'})
-
         ]
 
     def postlayout_setup(self):
