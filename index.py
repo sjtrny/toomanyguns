@@ -56,6 +56,21 @@ class Index(BootstrapApp):
             "marker": dict(opacity=0.5, line=dict(width=1))
         }
 
+        self.blank_fig_data = {
+            "type": "choroplethmapbox",
+        }
+
+        self.blank_fig_layout =  {
+
+            "mapbox": {
+                "zoom": 5,
+                "center": {"lat": -33, "lon": 146.9211},
+                "style": "streets",
+            },
+
+            "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
+        };
+
         super().__init__(name, server, url_base_pathname)
 
     def body(self):
@@ -100,24 +115,59 @@ class Index(BootstrapApp):
             dbc.Row(
                 [
                     dbc.Col(
-                        dcc.Graph(
-                            id="mapbox",
-                            config={
-                                "displayModeBar": False,
-                                "mapboxAccessToken": self.token
-                            },
-                            style={"height": "600px"}
-                        ),
+                        [
+                            dcc.Loading(
+                                [
+
+                                    dcc.Graph(
+                                        id="mapbox",
+                                        figure=dict(data=[self.blank_fig_data], layout=self.blank_fig_layout),
+                                        config={
+                                            "displayModeBar": False,
+                                            "mapboxAccessToken": self.token,
+                                            "responsive": True
+                                        },
+                                        style={"height": "600px"}
+                                    ),
+                                ]
+
+                            )
+                        ],
+
                         lg=12
                     ),
                 ],
                 style={'margin-top': "20px"}
             ),
-            html.Div(id='fig-data', children=json.dumps(self.fig_data), style={'display': 'none'}),
-            # html.Div(id='current-postcode', children="", style={'display': 'none'})
+            html.Div(id='fig-data', style={'display': 'none'}),
+            html.Div(id='data-ready', children=False, style={'display': 'none'})
+
         ]
 
     def postlayout_setup(self):
+
+        # Set the children of fig_data to be the JSON
+        @self.callback(
+            Output('fig-data', 'children'),
+            [Input('url', 'href')]
+        )
+        def load_data(href):
+
+            return json.dumps(self.fig_data)
+
+        self.clientside_callback(
+            ClientsideFunction('clientside', 'data_ready'),
+            Output(component_id="data-ready", component_property="children"),
+            [Input('fig-data', 'children')],
+        )
+
+        @self.callback(
+            Output('mapbox', 'style'),
+            [Input('data-ready', 'children')]
+        )
+        def load_data(href):
+            return {"height": "600px", "display": "block"}
+
 
         # (1) Set postcode based on:
         #     - URL (first load)
@@ -159,7 +209,7 @@ class Index(BootstrapApp):
         self.clientside_callback(
             ClientsideFunction('clientside', 'figure'),
             Output(component_id="mapbox", component_property="figure"),
-            [Input('postcode', 'value')],
+            [Input('data-ready', 'children'), Input('postcode', 'value')],
         )
 
         # (4) Set stats based on postcode dropdown

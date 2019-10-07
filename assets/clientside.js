@@ -7,7 +7,12 @@ window.dash_clientside.clientside = {
         return 'Client says "' + value + '"';
     },
 
-    figure: function (value) {
+    data_ready: function (value) {
+        return true;
+    },
+
+
+    figure: function (data_ready, value) {
 
         fig_div = document.getElementById("fig-data")
         if (!fig_div) {
@@ -53,35 +58,5 @@ window.dash_clientside.clientside = {
         }
 
     },
-
-    figure_first_load: function (value) {
-
-        fig_div = document.getElementById("fig-data")
-        if (!fig_div) {
-            throw "Figure data not loaded, aborting update."
-        }
-
-        fig_data = JSON.parse(document.getElementById("fig-data").innerText);
-
-        zoom = 5;
-        center = {"lat": -33, "lon": 146.9211};
-
-
-        fig_layout = {
-            mapbox: {
-                zoom: zoom,
-                center: center,
-                style: "streets",
-            },
-
-            margin: {r: 0, t: 0, l: 0, b: 0},
-        };
-
-        return {
-            data: [fig_data],
-            layout: fig_layout,
-        }
-
-    }
 
 }
