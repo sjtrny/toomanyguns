@@ -17,7 +17,7 @@ window.dash_clientside.clientside = {
         fig_data = JSON.parse(document.getElementById("fig-data").innerText);
 
         if (!value | value == "None") {
-            zoom = 4;
+            zoom = 5;
             center = {"lat": -33, "lon": 146.9211};
         }
         else {
@@ -33,7 +33,7 @@ window.dash_clientside.clientside = {
             mapbox: {
                 zoom: zoom,
                 center: center,
-                style: "light",
+                style: "streets",
             },
 
             margin: {r: 0, t: 0, l: 0, b: 0},

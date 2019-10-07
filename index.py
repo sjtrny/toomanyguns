@@ -51,10 +51,9 @@ class Index(BootstrapApp):
             "z": list(self.post_areas["Registered Firearms"]),
             "text": hover_text,
             "hoverinfo": "text",
-            "colorscale": 'Inferno',
-            # "marker_opacity": 0.5,
-            # "marker_line_width": 0,
-            "colorbar": {"title": 'Firearms'}
+            "colorscale": 'Viridis',
+            "colorbar": {"title": 'Firearms'},
+            "marker": dict(opacity=0.5, line=dict(width=1))
         }
 
         super().__init__(name, server, url_base_pathname)
@@ -73,7 +72,6 @@ class Index(BootstrapApp):
                         [
                             dbc.FormGroup(
                                 [
-                                    dbc.Label("Postcode", className="h3", style={'margin-bottom': "0px"}),
                                     dbc.FormText(
                                         "Select a postcode to see the stats",
                                         color="secondary",
@@ -85,7 +83,7 @@ class Index(BootstrapApp):
                                                   "value": code} for code in
                                                  self.post_areas['id']],
                                         value=None,
-                                        placeholder="Select a postcode",
+                                        placeholder="Postcode",
                                         className="h5 text-monospace"
                                     ),
 
@@ -106,7 +104,7 @@ class Index(BootstrapApp):
                             id="mapbox",
                             config={
                                 "displayModeBar": False,
-                                "mapboxAccessToken": "pk.eyJ1Ijoic2p0cm55IiwiYSI6ImNrMWJrOGlueTA1ZzMzbHBjeGdtOTN4MHUifQ.V20gMVX6fBu3kyWZaMpI_g"
+                                "mapboxAccessToken": self.token
                             },
                             style={"height": "600px"}
                         ),
