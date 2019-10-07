@@ -34,6 +34,7 @@ class BootstrapApp(dash.Dash, ABC):
             server=server,
             url_base_pathname=url_base_pathname,
             external_stylesheets=external_stylesheets,
+            external_scripts=["https://cdn.jsdelivr.net/npm/bs-breakpoints/dist/bs-breakpoints.min.js"],
             meta_tags=[
                 {"name": "viewport", "content": "width=device-width, initial-scale=1"}
             ]
