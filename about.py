@@ -8,12 +8,11 @@ class About(MarkdownApp):
 
     markdown = """
 ## About
+----
+This website shows firearms ownership in NSW by postcode. This information has been made public thanks to the NSW Greens through a FOI request to NSW Police. 
 
-This website shows firearms ownership in NSW by postcode.
-
-This information has been made public thanks to the NSW Greens through a FOI request to NSW Police. 
-    
 ## FAQ
+----
 
 ##### Doesn't toomanyguns.org already exist?
 
@@ -34,6 +33,7 @@ You can find the code on [Github](https://github.com/sjtrny/toomanyguns)
 I did, you can find more details on my website [sjtrny.com](https://sjtrny.com)
 
 ## Data
+----
 
 ##### Postcode Information
 

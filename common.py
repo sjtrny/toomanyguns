@@ -108,4 +108,12 @@ class MarkdownApp(BootstrapApp):
 
     def body(self):
 
-        return [dcc.Markdown(type(self).markdown)]
+        return [
+            dbc.Row(
+                dbc.Col(
+                    dcc.Markdown(type(self).markdown),
+                    lg=6
+                ),
+                justify="center"
+            )
+        ]
