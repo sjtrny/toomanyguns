@@ -19,7 +19,6 @@ header = [
         brand_external_link=True,
         color="dark",
         dark=True,
-        # expand="lg",
     )
 ]
 
@@ -35,6 +34,9 @@ class BootstrapApp(dash.Dash, ABC):
             server=server,
             url_base_pathname=url_base_pathname,
             external_stylesheets=external_stylesheets,
+            meta_tags=[
+                {"name": "viewport", "content": "width=device-width, initial-scale=1"}
+            ]
         )
 
         self.prelayout_setup()
@@ -75,7 +77,7 @@ class BootstrapApp(dash.Dash, ABC):
                     ]
                     # Content
                     + self.body() if type(self).breadcrumbs else self.body(),
-                    style={'margin-top': "20px"}
+                    style={'margin-top': "20px"},
                 ),
             ]
         )
