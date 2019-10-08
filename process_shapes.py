@@ -4,8 +4,10 @@ import pandas as pd
 import io
 import numpy as np
 
-# Based off https://stackoverflow.com/a/55146034/922745
+
 def calc_zoom(min_lat, max_lat, min_lng, max_lng):
+    # Based off https://stackoverflow.com/a/55146034/922745
+
     width_y = abs(max_lat - min_lat)
     width_x = abs(max_lng - min_lng)
     zoom_y = -1.446 * np.log(width_y) + 8

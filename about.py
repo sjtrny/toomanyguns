@@ -10,7 +10,7 @@ class About(MarkdownApp):
     markdown = """
 ## About
 ----
-This website shows ownership of firearms in NSW by postcode. This information has been made public thanks to the NSW Greens through a FOI request to NSW Police. 
+This website shows ownership of firearms in NSW by postcode. This information has been made public thanks to the NSW Greens through a FOI request to NSW Police.
 
 ## FAQ
 ----

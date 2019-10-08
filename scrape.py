@@ -24,6 +24,12 @@ def clean_str_int(text):
     return int(text.strip().replace(",", ""))
 
 
+data_regex = {
+    "Registered Firearms Owners": r"Registered firearms owners:(?P<number>.*)",
+    "Registered Firearms": r"Registered firearms:(?P<number>.*)",
+    "Largest stockpile": r"Largest number of guns held by one registered owner \(excluding collectors\):(?P<number>.*)",
+}
+
 for index, row in unique_nsw_postcodes.iterrows():
 
     print(
@@ -55,7 +61,7 @@ for index, row in unique_nsw_postcodes.iterrows():
 
         multi_col = (
             True
-            if soup.find("h3", text=re.compile("(\d+) Figures")) != None
+            if soup.find("h3", text=re.compile(r"(\d+) Figures")) is not None
             else False
         )
 
@@ -74,12 +80,6 @@ for index, row in unique_nsw_postcodes.iterrows():
                     "div", attrs={"class": "sqs-col-6"}
                 )[1]
 
-                data_regex = {
-                    "Registered Firearms Owners": "Registered firearms owners:(?P<number>.*)",
-                    "Registered Firearms": "Registered firearms:(?P<number>.*)",
-                    "Largest stockpile": "Largest number of guns held by one registered owner \(excluding collectors\):(?P<number>.*)",
-                }
-
                 for k, v in data_regex.items():
                     item_text = str(parent_2017.find(text=re.compile(v)))
                     item_value = clean_str_int(
@@ -95,7 +95,7 @@ for index, row in unique_nsw_postcodes.iterrows():
 
                 parse_sucess = True
 
-            except:
+            except Exception:
                 print(f"Parsing failed: {postcode}")
                 parse_sucess = False
 
@@ -103,12 +103,6 @@ for index, row in unique_nsw_postcodes.iterrows():
             data_2019_items["parse sucess"] = parse_sucess
         else:
             try:
-                data_regex = {
-                    "Registered Firearms Owners": "Registered firearms owners:(?P<number>.*)",
-                    "Registered Firearms": "Registered firearms:(?P<number>.*)",
-                    "Largest stockpile": "Largest number of guns held by one registered owner \(excluding collectors\):(?P<number>.*)",
-                }
-
                 for k, v in data_regex.items():
                     item_text = str(soup.find(text=re.compile(v)))
                     item_value = clean_str_int(
@@ -118,7 +112,7 @@ for index, row in unique_nsw_postcodes.iterrows():
 
                 parse_sucess = True
 
-            except:
+            except Exception:
                 print(f"Parsing failed: {postcode}")
                 parse_sucess = False
 
