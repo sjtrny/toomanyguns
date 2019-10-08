@@ -76,13 +76,13 @@ class Index(BootstrapApp):
                                         style={'margin-top': "0px", 'margin-bottom': "8px"}
                                     ),
                                     dcc.Dropdown(
-                                        id="postcode",
+                                        id="postcode-selected",
                                         options=[{"label": code,
                                                   "value": code} for code in
                                                  self.post_areas['id']],
                                         value=None,
                                         placeholder="Postcode",
-                                        className="h5 text-monospace"
+                                        className="h5 text-monospace",
                                     ),
 
                                 ]
@@ -136,9 +136,9 @@ class Index(BootstrapApp):
         #     - URL (first load)
         #     - map click
         @self.callback(
-            Output('postcode', 'value'),
+            Output('postcode-selected', 'value'),
             [Input('url', 'href'), Input('mapbox', 'clickData')],
-            [State('postcode', 'value')]
+            [State('postcode-selected', 'value')]
         )
         def update_dropdown(href, map_click_data, state_postcode):
             query_dict = parse_state(href)
@@ -155,7 +155,7 @@ class Index(BootstrapApp):
 
         # (2) Set URL based on postcode dropdown
         @self.callback(Output('url', 'search'),
-                       [Input('postcode', 'value')],
+                       [Input('postcode-selected', 'value')],
                        [State('url', 'search')])
         def update_url_state(drop_postcode, url_search):
 
@@ -172,13 +172,13 @@ class Index(BootstrapApp):
         self.clientside_callback(
             ClientsideFunction('clientside', 'figure'),
             Output(component_id="mapbox", component_property="figure"),
-            [Input('fig-data', 'data'), Input('postcode', 'value')],
+            [Input('fig-data', 'data'), Input('postcode-selected', 'value')],
         )
 
         # (4) Set stats based on postcode dropdown
         @self.callback(
             Output(component_id="postcode-stats", component_property="children"),
-            [Input(component_id="postcode", component_property="value")],
+            [Input(component_id="postcode-selected", component_property="value")],
         )
         def update_stats(postcode_selected):
 
