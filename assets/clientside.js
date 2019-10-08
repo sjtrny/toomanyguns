@@ -4,23 +4,24 @@ if (!window.dash_clientside) {
 
 window.dash_clientside.clientside = {
 
-    display: function (value) {
-        return 'Client says "' + value + '"';
-    },
-
-    data_ready: function (value) {
-        return true;
-    },
-
-
     figure: function (fig_data, postcode) {
 
         if (!fig_data) {
             throw "Figure data not loaded, aborting update."
         }
 
+        bsBreakpoints.init();
+        bp = bsBreakpoints.getCurrentBreakpoint();
+
         if (!postcode | postcode == "None") {
-            zoom = 5;
+
+            if (bp == "small" | bp == "xSmall") {
+                zoom = 4;
+            }
+            else {
+                zoom = 5;
+            }
+
             center = {"lat": -33, "lon": 146.9211};
         }
         else {
@@ -42,8 +43,7 @@ window.dash_clientside.clientside = {
             margin: {r: 0, t: 0, l: 0, b: 0},
         };
 
-        bsBreakpoints.init();
-        bp = bsBreakpoints.getCurrentBreakpoint();
+
 
         if (bp != "xLarge") {
             fig_data["showscale"] = false;

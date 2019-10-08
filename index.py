@@ -63,7 +63,7 @@ class Index(BootstrapApp):
         return [
             dbc.Row(
                 dbc.Col(
-                    html.H1("NSW Firearms Count"),
+                    html.H2("NSW Firearms Count"),
                     lg=12,
                     style={"text-align": "center"},
                 )
@@ -79,7 +79,7 @@ class Index(BootstrapApp):
                                         color="secondary",
                                         style={
                                             "margin-top": "0px",
-                                            "margin-bottom": "8px",
+                                            "margin-bottom": "0px",
                                         },
                                     ),
                                     dcc.Dropdown(
@@ -116,7 +116,10 @@ class Index(BootstrapApp):
                                             "mapboxAccessToken": self.token,
                                             "responsive": True,
                                         },
-                                        style={"height": "600px"},
+                                        style={
+                                            "height": "60vh",
+                                            "margin-bottom": "32px",
+                                        },
                                     )
                                 ],
                                 lg=12,
