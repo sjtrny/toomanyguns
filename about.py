@@ -16,7 +16,9 @@ This website shows ownership of firearms in NSW by postcode. This information ha
 
 ##### Doesn't toomanyguns.org already exist?
 
-Yes, but it could be better, so we made our own.
+Yes, but it could be better. It's 2019 and they don't even [use HTTPS](https://doesmysiteneedhttps.com/)!
+
+So we built our own.
 
 ##### This doesn't work on my computer/browser?
 
