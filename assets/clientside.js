@@ -31,16 +31,19 @@ window.dash_clientside.clientside = {
                 return v["properties"]["POA_CODE16"] == postcode
             });
 
-            postcode_features = all_data["geojson"]['features'][postcode_features_idx]
+            postcode_features = all_data["geojson"]['features'][postcode_features_idx];
 
             zoom = postcode_features['properties']["zoom"];
             center = postcode_features['properties']["centroid"];
+            firearms = postcode_features["properties"]["Registered Firearms"];
 
             new_layer = {
                 type: "choroplethmapbox",
                 geojson: postcode_features,
                 locations: [postcode_features["properties"]["POA_CODE16"]],
                 z: [1],
+                text: `Postcode: ${postcode}<br>Firearms: ${firearms}`,
+                hoverinfo: "text",
                 colorscale:  [
                     ['0.0', 'rgb(255,166,36)'],
                     ['1.0', 'rgb(255,166,36)'],
