@@ -56,21 +56,6 @@ class Index(BootstrapApp):
             "marker": dict(opacity=0.5, line=dict(width=1))
         }
 
-        self.blank_fig_data = {
-            "type": "choroplethmapbox",
-        }
-
-        self.blank_fig_layout =  {
-
-            "mapbox": {
-                "zoom": 5,
-                "center": {"lat": -33, "lon": 146.9211},
-                "style": "streets",
-            },
-
-            "margin": {"r": 0, "t": 0, "l": 0, "b": 0},
-        };
-
         super().__init__(name, server, url_base_pathname)
 
     def body(self):
@@ -80,46 +65,46 @@ class Index(BootstrapApp):
                 dbc.Col(html.H1("NSW Firearms Count"), lg=12, style={'text-align': "center"})
             ),
 
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dbc.FormGroup(
+                                [
+                                    dbc.FormText(
+                                        "Select a postcode to see the stats",
+                                        color="secondary",
+                                        style={'margin-top': "0px", 'margin-bottom': "8px"}
+                                    ),
+                                    dcc.Dropdown(
+                                        id="postcode",
+                                        options=[{"label": code,
+                                                  "value": code} for code in
+                                                 self.post_areas['id']],
+                                        value=None,
+                                        placeholder="Postcode",
+                                        className="h5 text-monospace"
+                                    ),
+
+                                ]
+                            ),
+                        ],
+                        lg=4,
+                        style={'text-align': "center"}
+                    )
+                ],
+                justify="center"
+            ),
+            html.Div(id="postcode-stats"),
             dcc.Loading(
                 [
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                [
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.FormText(
-                                                "Select a postcode to see the stats",
-                                                color="secondary",
-                                                style={'margin-top': "0px", 'margin-bottom': "8px"}
-                                            ),
-                                            dcc.Dropdown(
-                                                id="postcode",
-                                                options=[{"label": code,
-                                                          "value": code} for code in
-                                                         self.post_areas['id']],
-                                                value=None,
-                                                placeholder="Postcode",
-                                                className="h5 text-monospace"
-                                            ),
-
-                                        ]
-                                    ),
-                                ],
-                                lg=4,
-                                style={'text-align': "center"}
-                            )
-                        ],
-                        justify="center"
-                    ),
-                    html.Div(id="postcode-stats"),
+                    dcc.Store(id='fig-data', storage_type='local'),
                     dbc.Row(
                         [
                             dbc.Col(
                                 [
                                     dcc.Graph(
                                         id="mapbox",
-                                        figure=dict(data=[self.blank_fig_data], layout=self.blank_fig_layout),
                                         config={
                                             "displayModeBar": False,
                                             "mapboxAccessToken": self.token,
@@ -135,7 +120,7 @@ class Index(BootstrapApp):
                     ),
                 ]
             ),
-            html.Div(id='fig-data', style={'display': 'none'}),
+
             html.Div(id='data-ready', children=False, style={'display': 'none'})
         ]
 
@@ -143,25 +128,26 @@ class Index(BootstrapApp):
 
         # Set the children of fig_data to be the JSON
         @self.callback(
-            Output('fig-data', 'children'),
+            Output('fig-data', 'data'),
             [Input('url', 'href')]
         )
         def load_data(href):
 
-            return json.dumps(self.fig_data)
+            return self.fig_data
 
         self.clientside_callback(
             ClientsideFunction('clientside', 'data_ready'),
             Output(component_id="data-ready", component_property="children"),
-            [Input('fig-data', 'children')],
+            [Input('fig-data', 'data')],
         )
+
 
         @self.callback(
             Output('mapbox', 'style'),
             [Input('data-ready', 'children')]
         )
         def load_data(href):
-            return {"height": "600px", "display": "block"}
+            return {"height": "600px"}
 
 
         # (1) Set postcode based on:

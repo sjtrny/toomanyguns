@@ -12,22 +12,24 @@ window.dash_clientside.clientside = {
     },
 
 
-    figure: function (data_ready, value) {
+    figure: function (data_ready, postcode) {
 
-        fig_div = document.getElementById("fig-data")
-        if (!fig_div) {
+
+        fig_data_str = window.localStorage.getItem("fig-data");
+
+        if (!fig_data_str) {
             throw "Figure data not loaded, aborting update."
         }
 
-        fig_data = JSON.parse(document.getElementById("fig-data").innerText);
+        fig_data = JSON.parse(fig_data_str)
 
-        if (!value | value == "None") {
+        if (!postcode | postcode == "None") {
             zoom = 5;
             center = {"lat": -33, "lon": 146.9211};
         }
         else {
             postcode_features = fig_data["geojson"]['features'].find(function (v) {
-                return v["properties"]["POA_CODE16"] == value
+                return v["properties"]["POA_CODE16"] == postcode
             });
 
             zoom = postcode_features['properties']["zoom"];
