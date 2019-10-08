@@ -136,7 +136,6 @@ class Index(BootstrapApp):
         # Set the children of fig_data to be the JSON
         @self.callback(Output("fig-data", "data"), [Input("url", "href")])
         def load_data(href):
-
             return self.fig_data
 
         # (1) Set postcode based on:
