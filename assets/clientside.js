@@ -12,16 +12,11 @@ window.dash_clientside.clientside = {
     },
 
 
-    figure: function (data_ready, postcode) {
+    figure: function (fig_data, postcode) {
 
-
-        fig_data_str = window.localStorage.getItem("fig-data");
-
-        if (!fig_data_str) {
+        if (!fig_data) {
             throw "Figure data not loaded, aborting update."
         }
-
-        fig_data = JSON.parse(fig_data_str)
 
         if (!postcode | postcode == "None") {
             zoom = 5;

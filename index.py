@@ -97,7 +97,7 @@ class Index(BootstrapApp):
             html.Div(id="postcode-stats"),
             dcc.Loading(
                 [
-                    dcc.Store(id='fig-data', storage_type='local'),
+                    dcc.Store(id='fig-data'),
                     dbc.Row(
                         [
                             dbc.Col(
@@ -119,8 +119,6 @@ class Index(BootstrapApp):
                     ),
                 ]
             ),
-
-            html.Div(id='data-ready', children=False, style={'display': 'none'})
         ]
 
     def postlayout_setup(self):
@@ -133,21 +131,6 @@ class Index(BootstrapApp):
         def load_data(href):
 
             return self.fig_data
-
-        self.clientside_callback(
-            ClientsideFunction('clientside', 'data_ready'),
-            Output(component_id="data-ready", component_property="children"),
-            [Input('fig-data', 'data')],
-        )
-
-
-        @self.callback(
-            Output('mapbox', 'style'),
-            [Input('data-ready', 'children')]
-        )
-        def load_data(href):
-            return {"height": "600px"}
-
 
         # (1) Set postcode based on:
         #     - URL (first load)
@@ -189,7 +172,7 @@ class Index(BootstrapApp):
         self.clientside_callback(
             ClientsideFunction('clientside', 'figure'),
             Output(component_id="mapbox", component_property="figure"),
-            [Input('data-ready', 'children'), Input('postcode', 'value')],
+            [Input('fig-data', 'data'), Input('postcode', 'value')],
         )
 
         # (4) Set stats based on postcode dropdown
