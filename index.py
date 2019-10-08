@@ -18,6 +18,7 @@ def parse_state(url):
     state = dict(params)
     return state
 
+
 class Index(BootstrapApp):
     title = "Too Many Guns"
     breadcrumbs = None
@@ -50,9 +51,9 @@ class Index(BootstrapApp):
             "z": list(self.post_areas["Registered Firearms"]),
             "text": hover_text,
             "hoverinfo": "text",
-            "colorscale": 'Viridis',
-            "colorbar": {"title": 'Firearms'},
-            "marker": dict(opacity=0.5, line=dict(width=1))
+            "colorscale": "Viridis",
+            "colorbar": {"title": "Firearms"},
+            "marker": dict(opacity=0.5, line=dict(width=1)),
         }
 
         super().__init__(name, server, url_base_pathname)
@@ -61,9 +62,12 @@ class Index(BootstrapApp):
 
         return [
             dbc.Row(
-                dbc.Col(html.H1("NSW Firearms Count"), lg=12, style={'text-align': "center"})
+                dbc.Col(
+                    html.H1("NSW Firearms Count"),
+                    lg=12,
+                    style={"text-align": "center"},
+                )
             ),
-
             dbc.Row(
                 [
                     dbc.Col(
@@ -73,31 +77,34 @@ class Index(BootstrapApp):
                                     dbc.FormText(
                                         "Select a postcode to see the stats",
                                         color="secondary",
-                                        style={'margin-top': "0px", 'margin-bottom': "8px"}
+                                        style={
+                                            "margin-top": "0px",
+                                            "margin-bottom": "8px",
+                                        },
                                     ),
                                     dcc.Dropdown(
                                         id="postcode-selected",
-                                        options=[{"label": code,
-                                                  "value": code} for code in
-                                                 self.post_areas['id']],
+                                        options=[
+                                            {"label": code, "value": code}
+                                            for code in self.post_areas["id"]
+                                        ],
                                         value=None,
                                         placeholder="Postcode",
                                         className="h5 text-monospace",
                                     ),
-
                                 ]
-                            ),
+                            )
                         ],
                         lg=4,
-                        style={'text-align': "center"}
+                        style={"text-align": "center"},
                     )
                 ],
-                justify="center"
+                justify="center",
             ),
             html.Div(id="postcode-stats"),
             dcc.Loading(
                 [
-                    dcc.Store(id='fig-data'),
+                    dcc.Store(id="fig-data"),
                     dbc.Row(
                         [
                             dbc.Col(
@@ -107,15 +114,15 @@ class Index(BootstrapApp):
                                         config={
                                             "displayModeBar": False,
                                             "mapboxAccessToken": self.token,
-                                            "responsive": True
+                                            "responsive": True,
                                         },
-                                        style={"height": "600px"}
+                                        style={"height": "600px"},
                                     )
                                 ],
-                                lg=12
-                            ),
+                                lg=12,
+                            )
                         ],
-                        style={'margin-top': "20px"}
+                        style={"margin-top": "20px"},
                     ),
                 ]
             ),
@@ -124,10 +131,7 @@ class Index(BootstrapApp):
     def postlayout_setup(self):
 
         # Set the children of fig_data to be the JSON
-        @self.callback(
-            Output('fig-data', 'data'),
-            [Input('url', 'href')]
-        )
+        @self.callback(Output("fig-data", "data"), [Input("url", "href")])
         def load_data(href):
 
             return self.fig_data
@@ -136,27 +140,32 @@ class Index(BootstrapApp):
         #     - URL (first load)
         #     - map click
         @self.callback(
-            Output('postcode-selected', 'value'),
-            [Input('url', 'href'), Input('mapbox', 'clickData')],
-            [State('postcode-selected', 'value')]
+            Output("postcode-selected", "value"),
+            [Input("url", "href"), Input("mapbox", "clickData")],
+            [State("postcode-selected", "value")],
         )
         def update_dropdown(href, map_click_data, state_postcode):
             query_dict = parse_state(href)
 
-            click_postcode = map_click_data['points'][0]['location'] if map_click_data else None
+            click_postcode = (
+                map_click_data["points"][0]["location"]
+                if map_click_data
+                else None
+            )
 
             # First load/blank URL query
             if state_postcode is None and click_postcode is None:
-                if 'postcode' in query_dict:
-                    return query_dict['postcode']
+                if "postcode" in query_dict:
+                    return query_dict["postcode"]
 
             return click_postcode
 
-
         # (2) Set URL based on postcode dropdown
-        @self.callback(Output('url', 'search'),
-                       [Input('postcode-selected', 'value')],
-                       [State('url', 'search')])
+        @self.callback(
+            Output("url", "search"),
+            [Input("postcode-selected", "value")],
+            [State("url", "search")],
+        )
         def update_url_state(drop_postcode, url_search):
 
             if drop_postcode is None:
@@ -165,30 +174,45 @@ class Index(BootstrapApp):
                 else:
                     return None
 
-            state = urlencode(dict({'postcode': drop_postcode}))
-            return f'?{state}'
+            state = urlencode(dict({"postcode": drop_postcode}))
+            return f"?{state}"
 
         # (3) Set figure based on postcode dropdown
         self.clientside_callback(
-            ClientsideFunction('clientside', 'figure'),
+            ClientsideFunction("clientside", "figure"),
             Output(component_id="mapbox", component_property="figure"),
-            [Input('fig-data', 'data'), Input('postcode-selected', 'value')],
+            [Input("fig-data", "data"), Input("postcode-selected", "value")],
         )
 
         # (4) Set stats based on postcode dropdown
         @self.callback(
-            Output(component_id="postcode-stats", component_property="children"),
-            [Input(component_id="postcode-selected", component_property="value")],
+            Output(
+                component_id="postcode-stats", component_property="children"
+            ),
+            [
+                Input(
+                    component_id="postcode-selected",
+                    component_property="value",
+                )
+            ],
         )
         def update_stats(postcode_selected):
 
-            if postcode_selected and self.post_areas.loc[postcode_selected]['parse sucess']:
+            if (
+                postcode_selected
+                and self.post_areas.loc[postcode_selected]["parse sucess"]
+            ):
 
                 card_dict = {
-                    "Registered Firearms": self.post_areas.loc[postcode_selected]["Registered Firearms"],
-                    "Registered Owners": self.post_areas.loc[postcode_selected]["Registered Firearms Owners"],
-                    "Largest Stockpile": self.post_areas.loc[postcode_selected]["Largest stockpile"]
-
+                    "Registered Firearms": self.post_areas.loc[
+                        postcode_selected
+                    ]["Registered Firearms"],
+                    "Registered Owners": self.post_areas.loc[
+                        postcode_selected
+                    ]["Registered Firearms Owners"],
+                    "Largest Stockpile": self.post_areas.loc[
+                        postcode_selected
+                    ]["Largest stockpile"],
                 }
 
                 return [
@@ -199,19 +223,32 @@ class Index(BootstrapApp):
                                 # dbc.Card(
                                 #     dbc.CardBody(
                                 [
-                                    html.H4(f"{k}", style={'display': "inline", 'padding-right': "16px"},
-                                            className="align-middle"),
-                                    html.H2(f"{int(v)}", style={'display': "inline"}, className="align-middle")
+                                    html.H4(
+                                        f"{k}",
+                                        style={
+                                            "display": "inline",
+                                            "padding-right": "16px",
+                                        },
+                                        className="align-middle",
+                                    ),
+                                    html.H2(
+                                        f"{int(v)}",
+                                        style={"display": "inline"},
+                                        className="align-middle",
+                                    ),
                                 ],
                                 # )
                                 # ),
                                 lg=4,
-                                style={'text-align': "center", 'padding': "0px"},
+                                style={
+                                    "text-align": "center",
+                                    "padding": "0px",
+                                },
                             )
                             for k, v in card_dict.items()
                         ],
                         align="center",
-                        justify="center"
+                        justify="center",
                     ),
                     html.Hr(),
                 ]
@@ -220,4 +257,3 @@ class Index(BootstrapApp):
                 return html.P(f"No data for postcode {postcode_selected}")
             else:
                 return []
-

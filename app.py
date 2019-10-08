@@ -7,10 +7,8 @@ from about import About
 class MyApp(MultiPageApp):
     def get_routes(self):
 
-        return [
-            Route(Index, "index", "/"),
-            Route(About, "about", "/about/"),
-        ]
+        return [Route(Index, "index", "/"), Route(About, "about", "/about/")]
+
 
 server = Flask(__name__)
 

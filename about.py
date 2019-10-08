@@ -1,6 +1,7 @@
 from common import MarkdownApp
 import flask
 
+
 class About(MarkdownApp):
 
     title = "About"
@@ -55,13 +56,11 @@ Don't worry, you don't need to scrape it yourself, [click here to download it](d
     """
 
     def postlayout_setup(self):
-
         @self.server.route(
             f"{self.config.url_base_pathname}downloads/firearms_2019.csv",
-            endpoint=f"{self.config.url_base_pathname}:serve_file"
+            endpoint=f"{self.config.url_base_pathname}:serve_file",
         )
         def serve_file():
             return flask.send_file(
-                "data_generated/firearms_2019.csv",
-                as_attachment=True,
+                "data_generated/firearms_2019.csv", as_attachment=True
             )

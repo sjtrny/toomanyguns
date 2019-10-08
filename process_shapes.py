@@ -13,23 +13,30 @@ def calc_zoom(min_lat, max_lat, min_lng, max_lng):
 
     return min(zoom_y, zoom_x)
 
+
 # Load firearm records
 firearms = pd.read_csv("data_generated/firearms_2019.csv", index_col=0)
-firearms = firearms.set_index('postcode')
+firearms = firearms.set_index("postcode")
 
 # Load postal areas shape file
 geodf = gpd.read_file("data_static/POA_2016_AUST.shp")
-geodf['POA_CODE16'] = geodf['POA_CODE16'].astype(int)
-geodf = geodf.set_index('POA_CODE16', drop=False)
+geodf["POA_CODE16"] = geodf["POA_CODE16"].astype(int)
+geodf = geodf.set_index("POA_CODE16", drop=False)
 
 # Restrict shapes to NSW for performance
-nsw = geodf[(geodf['POA_CODE16'] >=2000) & (geodf['POA_CODE16'] < 3000)]
+nsw = geodf[(geodf["POA_CODE16"] >= 2000) & (geodf["POA_CODE16"] < 3000)]
 
 # Insert firearm data in the geo records
 nsw = nsw.merge(firearms, left_index=True, right_index=True)
 
-nsw['centroid'] = nsw.geometry.centroid.apply(lambda point: {'lon': point.x, 'lat': point.y})
-nsw['zoom'] = nsw.geometry.envelope.apply(lambda env: calc_zoom(env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0]))
+nsw["centroid"] = nsw.geometry.centroid.apply(
+    lambda point: {"lon": point.x, "lat": point.y}
+)
+nsw["zoom"] = nsw.geometry.envelope.apply(
+    lambda env: calc_zoom(
+        env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0]
+    )
+)
 
 geo_copy = nsw.copy()
 
@@ -56,11 +63,11 @@ geo_copy.geometry = gpd.GeoSeries(geo_list, index=geo_copy.index)
 
 # Convert to JSON, load as dictionary, insert id then save to disk
 proxyIO = io.BytesIO()
-geo_copy.to_file(proxyIO, driver='GeoJSON')
+geo_copy.to_file(proxyIO, driver="GeoJSON")
 
-post_areas = json.loads(proxyIO.getvalue().decode('utf-8'))
+post_areas = json.loads(proxyIO.getvalue().decode("utf-8"))
 
-for feat in post_areas['features']:
-    feat['id'] = feat['properties']['POA_NAME16']
+for feat in post_areas["features"]:
+    feat["id"] = feat["properties"]["POA_NAME16"]
 
 json.dump(post_areas, open(f"data_generated/nsw.json", "w"))

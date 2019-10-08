@@ -9,10 +9,8 @@ header = [
     dbc.NavbarSimple(
         children=[
             dbc.NavItem(
-                dbc.NavLink(
-                    "About", href="/about", external_link=True
-                )
-            ),
+                dbc.NavLink("About", href="/about", external_link=True)
+            )
         ],
         brand="Too Many Guns",
         brand_href="/",
@@ -24,7 +22,6 @@ header = [
 
 
 class BootstrapApp(dash.Dash, ABC):
-
     def __init__(self, name, server, url_base_pathname):
 
         external_stylesheets = [dbc.themes.BOOTSTRAP]
@@ -34,10 +31,15 @@ class BootstrapApp(dash.Dash, ABC):
             server=server,
             url_base_pathname=url_base_pathname,
             external_stylesheets=external_stylesheets,
-            external_scripts=["https://cdn.jsdelivr.net/npm/bs-breakpoints/dist/bs-breakpoints.min.js"],
+            external_scripts=[
+                "https://cdn.jsdelivr.net/npm/bs-breakpoints/dist/bs-breakpoints.min.js"
+            ],
             meta_tags=[
-                {"name": "viewport", "content": "width=device-width, initial-scale=1"}
-            ]
+                {
+                    "name": "viewport",
+                    "content": "width=device-width, initial-scale=1",
+                }
+            ],
         )
 
         self.prelayout_setup()
@@ -78,7 +80,7 @@ class BootstrapApp(dash.Dash, ABC):
                     ]
                     # Content
                     + self.body() if type(self).breadcrumbs else self.body(),
-                    style={'margin-top': "20px"},
+                    style={"margin-top": "20px"},
                 ),
             ]
         )
@@ -113,10 +115,7 @@ class MarkdownApp(BootstrapApp):
 
         return [
             dbc.Row(
-                dbc.Col(
-                    dcc.Markdown(type(self).markdown),
-                    lg=6
-                ),
-                justify="center"
+                dbc.Col(dcc.Markdown(type(self).markdown), lg=6),
+                justify="center",
             )
         ]
