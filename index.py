@@ -104,7 +104,7 @@ class Index(BootstrapApp):
             html.Div(id="postcode-stats"),
             dcc.Loading(
                 [
-                    dcc.Store(id="fig-data", data=self.fig_data),
+                    dcc.Store(id="fig-data"),
                     dbc.Row(
                         [
                             dbc.Col(
@@ -132,6 +132,11 @@ class Index(BootstrapApp):
         ]
 
     def postlayout_setup(self):
+
+        # Set the children of fig_data to be the JSON
+        @self.callback(Output("fig-data", "data"), [Input("url", "href")])
+        def load_data(href):
+            return self.fig_data
 
         # (1) Set postcode based on:
         #     - URL (first load)
