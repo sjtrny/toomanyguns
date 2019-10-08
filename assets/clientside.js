@@ -70,8 +70,8 @@ window.dash_clientside.clientside = {
 
 
         if (bp != "xLarge") {
-            all_data["showscale"] = false;
-            delete all_data["colorbar"]
+            fig_data[0]["showscale"] = false;
+            delete fig_data[0]["colorbar"]
         }
 
         return {
