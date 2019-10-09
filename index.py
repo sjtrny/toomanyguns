@@ -222,8 +222,6 @@ class Index(BootstrapApp):
                     dbc.Row(
                         [
                             dbc.Col(
-                                # dbc.Card(
-                                #     dbc.CardBody(
                                 [
                                     html.H4(
                                         f"{k}",
@@ -239,8 +237,6 @@ class Index(BootstrapApp):
                                         className="align-middle",
                                     ),
                                 ],
-                                # )
-                                # ),
                                 lg=4,
                                 style={
                                     "text-align": "center",
