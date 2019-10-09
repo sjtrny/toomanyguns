@@ -10,8 +10,18 @@ window.dash_clientside.clientside = {
             throw "Figure data not loaded, aborting update."
         }
 
-        fig_dict_str = JSON.stringify(all_data);
-        fig_dict = JSON.parse(fig_dict_str);
+        fig_dict = {
+                type: "choroplethmapbox",
+                geojson: all_data["geojson"],
+                locations: all_data["locations"],
+                z: all_data["z"],
+                text: all_data["text"],
+                hoverinfo: "text",
+                colorscale:  "Viridis",
+                colorbar: {title: "Firearms"},
+                marker: {opacity:0.5, line:{width:1}}
+        };
+
 
         bsBreakpoints.init();
         bp = bsBreakpoints.getCurrentBreakpoint();
@@ -55,7 +65,7 @@ window.dash_clientside.clientside = {
                 showscale: false,
             }
 
-            fig_dict['geojson']['features'] = fig_dict['geojson']['features'].filter((value, index) => postcode_features_idx !== index);
+            fig_dict["locations"] = all_data["locations"].filter((value, index) => (postcode_features_idx-1) !== index);
 
             fig_data = [fig_dict, new_layer]
         }
