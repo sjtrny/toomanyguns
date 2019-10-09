@@ -10,7 +10,8 @@ window.dash_clientside.clientside = {
             throw "Figure data not loaded, aborting update."
         }
 
-        fig_data = [{...all_data}];
+        fig_dict_str = JSON.stringify(all_data);
+        fig_dict = JSON.parse(fig_dict_str);
 
         bsBreakpoints.init();
         bp = bsBreakpoints.getCurrentBreakpoint();
@@ -25,6 +26,8 @@ window.dash_clientside.clientside = {
             }
 
             center = {"lat": -33, "lon": 146.9211};
+
+            fig_data = [fig_dict]
         }
         else {
             postcode_features_idx = all_data["geojson"]['features'].findIndex(function (v) {
@@ -52,9 +55,9 @@ window.dash_clientside.clientside = {
                 showscale: false,
             }
 
-            fig_data[0]["geojson"]['features'].splice(postcode_features_idx, 1)
+            fig_dict['geojson']['features'] = fig_dict['geojson']['features'].filter((value, index) => postcode_features_idx !== index);
 
-            fig_data.push(new_layer)
+            fig_data = [fig_dict, new_layer]
         }
 
         fig_layout = {
