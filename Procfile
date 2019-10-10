@@ -1,1 +1,1 @@
-web: gunicorn --preload app:server
+web: gunicorn -w 2 --threads 2 app:server
