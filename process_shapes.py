@@ -1,8 +1,9 @@
-import geopandas as gpd
-import json
-import pandas as pd
 import io
+import json
+
+import geopandas as gpd
 import numpy as np
+import pandas as pd
 
 
 def calc_zoom(min_lat, max_lat, min_lng, max_lng):
@@ -35,9 +36,7 @@ nsw["centroid"] = nsw.geometry.centroid.apply(
     lambda point: {"lon": point.x, "lat": point.y}
 )
 nsw["zoom"] = nsw.geometry.envelope.apply(
-    lambda env: calc_zoom(
-        env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0]
-    )
+    lambda env: calc_zoom(env.bounds[1], env.bounds[3], env.bounds[2], env.bounds[0])
 )
 
 geo_copy = nsw.copy()

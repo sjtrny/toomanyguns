@@ -1,8 +1,9 @@
+import re
+import time
+
 import pandas as pd
 import requests
-import re
 from bs4 import BeautifulSoup
-import time
 
 postcodes = pd.read_csv("data_static/australian_postcodes.csv")
 
@@ -12,9 +13,7 @@ nsw_postcodes = postcodes[
     & (postcodes["postcode"] < 3000)
 ]
 
-unique_nsw_postcodes = nsw_postcodes.drop_duplicates(
-    subset=["postcode"], keep="first"
-)
+unique_nsw_postcodes = nsw_postcodes.drop_duplicates(subset=["postcode"], keep="first")
 
 rows_2017 = []
 rows_2019 = []
@@ -69,28 +68,20 @@ for index, row in unique_nsw_postcodes.iterrows():
             try:
 
                 # parent_2017 = soup.find("h3", text="2017 Figures").parent
-                parent_2017 = soup.find_all(
-                    "div", attrs={"class": "sqs-col-6"}
-                )[0]
+                parent_2017 = soup.find_all("div", attrs={"class": "sqs-col-6"})[0]
 
                 # They use december 2018 figures as 2019 figures
                 # They replace the title using javascript
                 # parent_2019 = soup.find("h3", text=re.compile("2019 Figures|2018 Figures")).parent
-                parent_2019 = soup.find_all(
-                    "div", attrs={"class": "sqs-col-6"}
-                )[1]
+                parent_2019 = soup.find_all("div", attrs={"class": "sqs-col-6"})[1]
 
                 for k, v in data_regex.items():
                     item_text = str(parent_2017.find(text=re.compile(v)))
-                    item_value = clean_str_int(
-                        re.search(v, item_text).group("number")
-                    )
+                    item_value = clean_str_int(re.search(v, item_text).group("number"))
                     data_2017_items[k] = item_value
 
                     item_text = str(parent_2019.find(text=re.compile(v)))
-                    item_value = clean_str_int(
-                        re.search(v, item_text).group("number")
-                    )
+                    item_value = clean_str_int(re.search(v, item_text).group("number"))
                     data_2019_items[k] = item_value
 
                 parse_sucess = True
@@ -105,9 +96,7 @@ for index, row in unique_nsw_postcodes.iterrows():
             try:
                 for k, v in data_regex.items():
                     item_text = str(soup.find(text=re.compile(v)))
-                    item_value = clean_str_int(
-                        re.search(v, item_text).group("number")
-                    )
+                    item_value = clean_str_int(re.search(v, item_text).group("number"))
                     data_2019_items[k] = item_value
 
                 parse_sucess = True

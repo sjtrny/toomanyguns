@@ -1,11 +1,6 @@
-if (!window.dash_clientside) {
-     window.dash_clientside = {}
- }
-
-window.dash_clientside.clientside = {
-
+window.dash_clientside = Object.assign({}, window.dash_clientside, {
+  clientside: {
     figure: function (all_data, postcode) {
-
         if (!all_data) {
             throw "Figure data not loaded, aborting update."
         }
@@ -35,6 +30,7 @@ window.dash_clientside.clientside = {
                 zoom = 5;
             }
 
+            zoom=5
             center = {"lat": -33, "lon": 146.9211};
 
             fig_data = [fig_dict]
@@ -93,5 +89,5 @@ window.dash_clientside.clientside = {
         }
 
     },
-
-}
+  }
+});

@@ -7,11 +7,7 @@ import dash_html_components as html
 
 header = [
     dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(
-                dbc.NavLink("About", href="/about", external_link=True)
-            )
-        ],
+        children=[dbc.NavItem(dbc.NavLink("About", href="/about", external_link=True))],
         brand="Too Many Guns",
         brand_href="/",
         brand_external_link=True,
@@ -62,9 +58,7 @@ class BootstrapApp(dash.Dash, ABC):
                                             ),
                                             className="breadcrumb-item",
                                         )
-                                        for crumb_tuple in type(
-                                            self
-                                        ).breadcrumbs[:-1]
+                                        for crumb_tuple in type(self).breadcrumbs[:-1]
                                     ]
                                     + [
                                         html.Li(

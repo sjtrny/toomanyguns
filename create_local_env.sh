@@ -1,3 +1,5 @@
+brew install gdal
+
 venv_name=venv
 
 virtualenv --always-copy -p python3 $venv_name

@@ -1,7 +1,8 @@
+from datetime import date
+
 import dash
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback, dcc, html
-from datetime import date
 
 dash.register_page(__name__, path="/about", title="About | Too Many Guns")
 
@@ -12,7 +13,8 @@ layout = dbc.Container(
         dbc.Row(
             dbc.Col(
                 [
-                    dcc.Markdown(f"""
+                    dcc.Markdown(
+                        f"""
                     ## About
                     ----
                     This website shows ownership of firearms in NSW by postcode. This information has been made public thanks to the NSW Greens through a FOI request to NSW Police.
@@ -56,7 +58,8 @@ layout = dbc.Container(
                     I did my best to scrape [http://toomanyguns.org](http://toomanyguns.org).
 
                     [Click here to download the data](/assets/firearms_2019.csv).
-                    """),
+                    """
+                    ),
                 ]
             )
         )
