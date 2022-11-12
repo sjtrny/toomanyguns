@@ -6,7 +6,7 @@ A plotly dash app displaying ownership of firearms in NSW, Australia.
 
 ## Live Demo
 
-https://toomanyguns.herokuapp.com/
+https://toomanyguns.render.com/
 
 ## Screenshot
 
@@ -45,4 +45,3 @@ The specific file used is titled "Postal Areas ASGS Ed 2016 Digital Boundaries i
 We did our best to scrape [http://toomanyguns.org](http://toomanyguns.org).
 
 Don't worry, you don't need to scrape it yourself, [click here to download it](downloads/firearms_2019.csv).
-
