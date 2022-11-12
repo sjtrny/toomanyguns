@@ -24,15 +24,13 @@ layout = dbc.Container(
 
                     Yes, but it could be better. It's {current_year} and they don't even [use HTTPS](https://doesmysiteneedhttps.com/)!
 
-                    So we built our own.
-
                     ##### This doesn't work on my computer/browser?
 
                     It's best viewed on a modern browser such as Safari or Chrome with graphics acceleration enabled.
 
                     ##### How did you make this?
 
-                    This website is built on [Dash for Python](https://github.com/plotly/dash) by Plotly.
+                    This website is built on [Dash for Python](https://github.com/plotly/dash).
 
                     You can find the code on [Github](https://github.com/sjtrny/toomanyguns)
 
@@ -55,9 +53,9 @@ layout = dbc.Container(
 
                     ##### Firearms Data
 
-                    We did our best to scrape [http://toomanyguns.org](http://toomanyguns.org).
+                    I did my best to scrape [http://toomanyguns.org](http://toomanyguns.org).
 
-                    Don't worry, you don't need to scrape it yourself, [click here to download it](/assets/firearms_2019.csv).
+                    [Click here to download the data](/assets/firearms_2019.csv).
                     """),
                 ]
             )
