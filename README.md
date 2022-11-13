@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/sjtrny/toomanyguns.svg?branch=master)](https://travis-ci.org/sjtrny/toomanyguns)
-
 # toomanyguns
 
 A plotly dash app displaying ownership of firearms in NSW, Australia.
