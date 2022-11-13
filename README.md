@@ -43,4 +43,4 @@ The specific file used is titled "Postal Areas ASGS Ed 2016 Digital Boundaries i
 
 We did our best to scrape [http://toomanyguns.org](http://toomanyguns.org).
 
-Don't worry, you don't need to scrape it yourself, [click here to download it](downloads/firearms_2019.csv).
+[Click here to download it](https://raw.githubusercontent.com/sjtrny/toomanyguns/master/assets/firearms_2019.csv).
