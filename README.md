@@ -22,7 +22,6 @@ With a combination of:
 - [Mapbox](https://www.mapbox.com/), for interactive maps
 
 With dash we use a few notable features, techniques and third-party libraries:
-- [dash-multi](https://github.com/sjtrny/dash-multi), for multipage apps
 - [dash-bootstrap-components](https://github.com/facultyai/dash-bootstrap-components), to make pages responsive and pretty
 - [client side callbacks](https://dash.plot.ly/performance), for network performance reasons
 - [store component](https://dash.plot.ly/dash-core-components/store), for network performance reasons

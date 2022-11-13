@@ -8,13 +8,25 @@ dash.register_page(__name__, path="/about", title="About | Too Many Guns")
 
 current_year = date.today().year
 
-layout = dbc.Container(
+layout = html.Div(
     [
-        dbc.Row(
-            dbc.Col(
-                [
-                    dcc.Markdown(
-                        f"""
+        dbc.NavbarSimple(
+            children=[
+                dbc.NavItem(html.A("About", href="/about", className="nav-link")),
+            ],
+            brand="Teacher Pay Dashboard",
+            brand_href="/",
+            color="dark",
+            dark=True,
+            className="mb-4",
+        ),
+        dbc.Container(
+            [
+                dbc.Row(
+                    dbc.Col(
+                        [
+                            dcc.Markdown(
+                                f"""
                     ## About
                     ----
                     This website shows ownership of firearms in NSW by postcode. This information has been made public thanks to the NSW Greens through a FOI request to NSW Police.
@@ -59,10 +71,11 @@ layout = dbc.Container(
 
                     [Click here to download the data](/assets/firearms_2019.csv).
                     """
-                    ),
-                ]
-            )
-        )
-    ],
-    className="mb-5 mt-3",
+                            ),
+                        ]
+                    )
+                )
+            ]
+        ),
+    ]
 )
