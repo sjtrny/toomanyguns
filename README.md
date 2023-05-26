@@ -2,6 +2,20 @@
 
 A plotly dash app displaying ownership of firearms in NSW, Australia.
 
+## Instructions
+
+### Build
+
+`docker build -t toomanyguns .`
+
+### Run
+
+`docker run --name toomanyguns -d -p 8080:80 toomanyguns`
+
+### tar
+
+`tar --exclude-vcs -czf file.tar --exclude file.tar .`
+
 ## Live Demo
 
 https://toomanyguns.render.com/
