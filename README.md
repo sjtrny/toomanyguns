@@ -2,23 +2,9 @@
 
 A plotly dash app displaying ownership of firearms in NSW, Australia.
 
-## Instructions
-
-### Build
-
-`docker build -t toomanyguns .`
-
-### Run
-
-`docker run --name toomanyguns -d -p 8080:80 toomanyguns`
-
-### tar
-
-`tar --exclude-vcs -czf file.tar --exclude file.tar .`
-
 ## Live Demo
 
-https://toomanyguns.render.com/
+https://toomanyguns.apps.sjtrny.com
 
 ## Screenshot
 
@@ -56,3 +42,13 @@ The specific file used is titled "Postal Areas ASGS Ed 2016 Digital Boundaries i
 We did our best to scrape [http://toomanyguns.org](http://toomanyguns.org).
 
 [Click here to download it](https://raw.githubusercontent.com/sjtrny/toomanyguns/master/assets/firearms_2019.csv).
+
+## Instructions
+
+### Build
+
+`docker build -t toomanyguns .`
+
+### Run
+
+`docker run --name toomanyguns -d -p 8080:80 toomanyguns`
