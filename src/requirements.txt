@@ -1,5 +1,5 @@
 beautifulsoup4==4.11.1
-black==22.6.0
+black==24.3.0
 dash==2.10.0
 dash-bootstrap-components==1.2.1
 geopandas==0.12.0
