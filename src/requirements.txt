@@ -1,9 +1,9 @@
 beautifulsoup4==4.11.1
-black==22.6.0
-dash==2.10.0
+black==24.3.0
+dash==2.15.0
 dash-bootstrap-components==1.2.1
-geopandas==0.12.0
-gunicorn==20.1.0
+geopandas==1.0.1
+gunicorn==22.0.0
 hurry.filesize==0.9
 isort==5.10.1
-pandas==1.4.3
+pandas>=2.1.2
