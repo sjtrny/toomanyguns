@@ -56,7 +56,7 @@ layout = html.Div(
             children=[
                 dbc.NavItem(html.A("About", href="/about", className="nav-link")),
             ],
-            brand="Teacher Pay Dashboard",
+            brand="Too Many Guns",
             brand_href="/",
             color="dark",
             dark=True,
