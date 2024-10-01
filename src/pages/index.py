@@ -50,7 +50,7 @@ zoom_level = 12 - np.log(max_bound)
 fig = go.Figure(
     data=[
         go.Choroplethmap(
-            geojson=post_areas_json,
+            geojson=post_areas.to_geo_dict(),
             locations=post_areas["id"],
             z=post_areas["Registered Firearms"],
             colorscale="Viridis",
@@ -215,7 +215,7 @@ def update_map(postcode_selected):
 
         patched_fig['data'].append(
             go.Choroplethmap(
-                geojson=post_areas_json,
+                geojson=filtered_area.to_geo_dict(),
                 locations=filtered_area["id"],
                 z=filtered_area["Registered Firearms"],
                 colorscale="Viridis",
