@@ -4,9 +4,11 @@ from urllib.parse import parse_qsl, urlencode, urlparse
 import dash
 import dash_bootstrap_components as dbc
 import geopandas as gpd
-from dash import Input, Output, State, callback, dcc, html
+from dash import Input, Output, State, callback, dcc, html, Patch
 import plotly.express as px
+import plotly.graph_objects as go
 import numpy as np
+
 
 def parse_state(url):
     parse_result = urlparse(url)
@@ -30,6 +32,44 @@ post_areas = post_areas.dropna()
 # 2898 - Lord Howe Island
 # 2899 - Norfolk Pine
 post_areas = post_areas.drop(["2898", "2899"])
+
+post_areas['hover_text'] = [
+    f"Postcode: {index}<br>" f"Firearms: {int(row['Registered Firearms'])}"
+    for index, row in post_areas.iterrows()
+]
+
+
+bounds = post_areas.total_bounds
+center_lon = (bounds[0] + bounds[2]) / 2
+center_lat = (bounds[1] + bounds[3]) / 2
+
+# https://stackoverflow.com/a/65043576
+max_bound = max(abs(bounds[2] - bounds[0]), abs(bounds[1] - bounds[3])) * 111
+zoom_level = 12 - np.log(max_bound)
+
+fig = go.Figure(
+    data=[
+        go.Choroplethmap(
+            geojson=post_areas_json,
+            locations=post_areas["id"],
+            z=post_areas["Registered Firearms"],
+            colorscale="Viridis",
+            text=post_areas['hover_text'],
+            hoverinfo="text",
+            colorbar={"title": "Registered Firearms"},
+            marker=dict(opacity=0.5, line=dict(width=1)),
+        )
+    ]
+)
+
+fig.update_layout(
+    map_style="carto-positron",
+    map_zoom=zoom_level,
+    map_center={"lat": center_lat, "lon": center_lon},
+    margin=dict(l=20, r=20, t=20, b=20),
+)
+
+
 
 layout = html.Div(
     [
@@ -96,12 +136,13 @@ layout = html.Div(
                                     [
                                         dcc.Graph(
                                             id="map",
+                                            figure=fig,
                                             config={
                                                 "displayModeBar": False,
                                                 "responsive": True,
                                             },
                                             style={
-                                                "height": "75vh",
+                                                "height": "70vh",
                                                 "margin-bottom": "32px",
                                             },
                                         )
@@ -109,7 +150,7 @@ layout = html.Div(
                                     lg=12,
                                 )
                             ],
-                            style={"margin-top": "20px"},
+                            # style={"margin-top": "20px"},
                         ),
                     ]
                 ),
@@ -158,44 +199,52 @@ def update_url_state(drop_postcode, url_search):
     state = urlencode(dict({"postcode": drop_postcode}))
     return f"?{state}"
 
+
 @callback(
     Output("map", "figure"),
     Input("postcode-selected", "value"),
 )
 def update_map(postcode_selected):
+    patched_fig = Patch()
 
     if postcode_selected:
         # https://github.com/geopandas/geopandas/issues/1051#issuecomment-585085721
+        patched_fig['data'][0]['visible'] = False
+
         filtered_area = post_areas.loc[[postcode_selected]]
+
+        patched_fig['data'].append(
+            go.Choroplethmap(
+                geojson=post_areas_json,
+                locations=filtered_area["id"],
+                z=filtered_area["Registered Firearms"],
+                colorscale="Viridis",
+                text=filtered_area['hover_text'],
+                hoverinfo="text",
+                colorbar={"title": "Registered Firearms"},
+                marker=dict(opacity=0.5, line=dict(width=1)),
+            )
+        )
+
+        bounds = filtered_area.total_bounds
+        center_lon = (bounds[0] + bounds[2]) / 2
+        center_lat = (bounds[1] + bounds[3]) / 2
+
+        # https://stackoverflow.com/a/65043576
+        max_bound = max(abs(bounds[2] - bounds[0]), abs(bounds[1] - bounds[3])) * 111
+        zoom_level = 12 - np.log(max_bound)
+
+        patched_fig['layout']['map'] = dict(
+            style="carto-positron",
+            zoom=zoom_level,
+            center={"lat": center_lat, "lon": center_lon},
+        )
+
     else:
-        filtered_area = post_areas
+        patched_fig['data'][0]['visible'] = True
+        del patched_fig['data'][1]
 
-    bounds = filtered_area.total_bounds
-    center_lon = (bounds[0] + bounds[2]) / 2
-    center_lat = (bounds[1] + bounds[3]) / 2
-
-    # https://stackoverflow.com/a/65043576
-    max_bound = max(abs(bounds[2] - bounds[0]), abs(bounds[1] - bounds[3])) * 111
-    zoom_level = 12 - np.log(max_bound)
-
-    fig = px.choropleth_map(
-        filtered_area,
-        geojson=filtered_area.geometry,
-        featureidkey = "id",
-        locations=filtered_area.index,
-        color="Registered Firearms",
-        zoom=zoom_level,
-        center={"lat": center_lat, "lon": center_lon},
-        color_continuous_scale=px.colors.sequential.Viridis if len(filtered_area) > 1 else ['rgb(255,166,36)', 'rgb(255,166,36)'],
-    )
-
-    fig.update_traces(
-        hovertemplate="<b>Postcode:</b> %{location}<br><b>Registered Firearms:</b> %{z}<extra></extra>"
-    )
-
-    return fig
-
-
+    return patched_fig
 
 # # (4) Set stats based on postcode dropdown
 @callback(
