@@ -4,10 +4,9 @@ from urllib.parse import parse_qsl, urlencode, urlparse
 import dash
 import dash_bootstrap_components as dbc
 import geopandas as gpd
-from dash import Input, Output, State, callback, dcc, html, Patch
-import plotly.express as px
-import plotly.graph_objects as go
 import numpy as np
+import plotly.graph_objects as go
+from dash import Input, Output, Patch, State, callback, dcc, html
 
 
 def parse_state(url):
@@ -33,7 +32,7 @@ post_areas = post_areas.dropna()
 # 2899 - Norfolk Pine
 post_areas = post_areas.drop(["2898", "2899"])
 
-post_areas['hover_text'] = [
+post_areas["hover_text"] = [
     f"Postcode: {index}<br>" f"Firearms: {int(row['Registered Firearms'])}"
     for index, row in post_areas.iterrows()
 ]
@@ -54,7 +53,7 @@ fig = go.Figure(
             locations=post_areas["id"],
             z=post_areas["Registered Firearms"],
             colorscale="Viridis",
-            text=post_areas['hover_text'],
+            text=post_areas["hover_text"],
             hoverinfo="text",
             colorbar={"title": "Registered Firearms"},
             marker=dict(opacity=0.5, line=dict(width=1)),
@@ -68,7 +67,6 @@ fig.update_layout(
     map_center={"lat": center_lat, "lon": center_lon},
     margin=dict(l=20, r=20, t=20, b=20),
 )
-
 
 
 layout = html.Div(
@@ -209,17 +207,17 @@ def update_map(postcode_selected):
 
     if postcode_selected:
         # https://github.com/geopandas/geopandas/issues/1051#issuecomment-585085721
-        patched_fig['data'][0]['visible'] = False
+        patched_fig["data"][0]["visible"] = False
 
         filtered_area = post_areas.loc[[postcode_selected]]
 
-        patched_fig['data'].append(
+        patched_fig["data"].append(
             go.Choroplethmap(
                 geojson=filtered_area.to_geo_dict(),
                 locations=filtered_area["id"],
                 z=filtered_area["Registered Firearms"],
                 colorscale="Viridis",
-                text=filtered_area['hover_text'],
+                text=filtered_area["hover_text"],
                 hoverinfo="text",
                 colorbar={"title": "Registered Firearms"},
                 marker=dict(opacity=0.5, line=dict(width=1)),
@@ -234,17 +232,18 @@ def update_map(postcode_selected):
         max_bound = max(abs(bounds[2] - bounds[0]), abs(bounds[1] - bounds[3])) * 111
         zoom_level = 12 - np.log(max_bound)
 
-        patched_fig['layout']['map'] = dict(
+        patched_fig["layout"]["map"] = dict(
             style="carto-positron",
             zoom=zoom_level,
             center={"lat": center_lat, "lon": center_lon},
         )
 
     else:
-        patched_fig['data'][0]['visible'] = True
-        del patched_fig['data'][1]
+        patched_fig["data"][0]["visible"] = True
+        del patched_fig["data"][1]
 
     return patched_fig
+
 
 # # (4) Set stats based on postcode dropdown
 @callback(
