@@ -7,6 +7,7 @@ import geopandas as gpd
 import numpy as np
 import plotly.graph_objects as go
 from dash import Input, Output, Patch, State, callback, dcc, html
+from dash.exceptions import PreventUpdate
 
 
 def parse_state(url):
@@ -138,6 +139,7 @@ layout = html.Div(
                                             config={
                                                 "displayModeBar": False,
                                                 "responsive": True,
+                                                "doubleClick": "reset",
                                             },
                                             style={
                                                 "height": "70vh",
@@ -177,6 +179,10 @@ def update_dropdown(href, map_click_data, state_postcode):
         if "postcode" in query_dict:
             return query_dict["postcode"]
 
+    # Prevent update triggering if clicking on already selected region
+    if click_postcode == state_postcode:
+        raise PreventUpdate
+
     return click_postcode
 
 
@@ -199,10 +205,9 @@ def update_url_state(drop_postcode, url_search):
 
 
 @callback(
-    Output("map", "figure"),
-    Input("postcode-selected", "value"),
+    Output("map", "figure"), Input("postcode-selected", "value"), State("map", "figure")
 )
-def update_map(postcode_selected):
+def update_map(postcode_selected, fig_state):
     patched_fig = Patch()
 
     if postcode_selected:
