@@ -6,8 +6,9 @@ import dash_bootstrap_components as dbc
 import geopandas as gpd
 import numpy as np
 import plotly.graph_objects as go
-from dash import Input, Output, Patch, State, callback, dcc, html
+from dash import Input, Output, Patch, State, callback, ctx, dcc, html
 from dash.exceptions import PreventUpdate
+from dash_breakpoints import WindowBreakpoints
 
 
 def parse_state(url):
@@ -73,6 +74,12 @@ fig.update_layout(
 layout = html.Div(
     [
         dcc.Location(id="url", refresh=False),
+        html.Div(id="display"),
+        WindowBreakpoints(
+            id="breakpoints",
+            widthBreakpointThresholdsPx=[576, 768, 992, 1200, 1400],
+            widthBreakpointNames=["xs", "sm", "md", "lg", "xl", "xxl"],
+        ),
         dbc.NavbarSimple(
             children=[
                 dbc.NavItem(html.A("About", href="/about", className="nav-link")),
@@ -205,47 +212,61 @@ def update_url_state(drop_postcode, url_search):
 
 
 @callback(
-    Output("map", "figure"), Input("postcode-selected", "value"), State("map", "figure")
+    Output("map", "figure"),
+    Input("postcode-selected", "value"),
+    Input("breakpoints", "widthBreakpoint"),
+    State("breakpoints", "width"),
 )
-def update_map(postcode_selected, fig_state):
+def update_map(postcode_selected, breakpoint_name, window_width):
     patched_fig = Patch()
 
-    if postcode_selected:
-        # https://github.com/geopandas/geopandas/issues/1051#issuecomment-585085721
-        patched_fig["data"][0]["visible"] = False
+    triggered_props = list(ctx.triggered_prop_ids.values())
 
-        filtered_area = post_areas.loc[[postcode_selected]]
+    if "postcode-selected" in triggered_props:
+        if postcode_selected:
+            del patched_fig["data"][1]
 
-        patched_fig["data"].append(
-            go.Choroplethmap(
-                geojson=filtered_area.to_geo_dict(),
-                locations=filtered_area["id"],
-                z=filtered_area["Registered Firearms"],
-                colorscale="Viridis",
-                text=filtered_area["hover_text"],
-                hoverinfo="text",
-                colorbar={"title": "Registered Firearms"},
-                marker=dict(opacity=0.5, line=dict(width=1)),
+            # https://github.com/geopandas/geopandas/issues/1051#issuecomment-585085721
+            filtered_area = post_areas.loc[[postcode_selected]]
+
+            patched_fig["data"].append(
+                go.Choroplethmap(
+                    geojson=filtered_area.to_geo_dict(),
+                    locations=filtered_area["id"],
+                    z=filtered_area["Registered Firearms"],
+                    colorscale=["rgb(255,166,36)", "rgb(255,166,36)"],
+                    showscale=False,
+                    text=filtered_area["hover_text"],
+                    hoverinfo="text",
+                    # colorbar={"title": "Registered Firearms"},
+                    marker=dict(opacity=0.9, line=dict(width=1)),
+                )
             )
-        )
 
-        bounds = filtered_area.total_bounds
-        center_lon = (bounds[0] + bounds[2]) / 2
-        center_lat = (bounds[1] + bounds[3]) / 2
+            bounds = filtered_area.total_bounds
+            center_lon = (bounds[0] + bounds[2]) / 2
+            center_lat = (bounds[1] + bounds[3]) / 2
 
-        # https://stackoverflow.com/a/65043576
-        max_bound = max(abs(bounds[2] - bounds[0]), abs(bounds[1] - bounds[3])) * 111
-        zoom_level = 12 - np.log(max_bound)
+            # https://stackoverflow.com/a/65043576
+            max_bound = (
+                max(abs(bounds[2] - bounds[0]), abs(bounds[1] - bounds[3])) * 111
+            )
+            zoom_level = 12.5 - np.log(max_bound)
 
-        patched_fig["layout"]["map"] = dict(
-            style="carto-positron",
-            zoom=zoom_level,
-            center={"lat": center_lat, "lon": center_lon},
-        )
+            patched_fig["layout"]["map"] = dict(
+                style="carto-positron",
+                zoom=zoom_level,
+                center={"lat": center_lat, "lon": center_lon},
+            )
+        else:
+            patched_fig["data"][0]["visible"] = True
+            del patched_fig["data"][1]
 
-    else:
-        patched_fig["data"][0]["visible"] = True
-        del patched_fig["data"][1]
+    if "breakpoints" in triggered_props:
+        if window_width <= 992:
+            patched_fig["data"][0]["showscale"] = False
+        else:
+            patched_fig["data"][0]["showscale"] = True
 
     return patched_fig
 
