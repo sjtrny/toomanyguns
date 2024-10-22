@@ -6,10 +6,6 @@ A plotly dash app displaying ownership of firearms in NSW, Australia.
 
 https://toomanyguns.apps.sjtrny.com
 
-## Screenshot
-
-<img src="https://github.com/sjtrny/toomanyguns/raw/master/screenshots/example.png" height="480">
-
 ## How?
 
 With a combination of:
