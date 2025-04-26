@@ -4,7 +4,7 @@ A plotly dash app displaying ownership of firearms in NSW, Australia.
 
 ## Live Demo
 
-https://toomanyguns.apps.sjtrny.com
+https://toomanyguns.sjtrny.com
 
 ## How?
 
